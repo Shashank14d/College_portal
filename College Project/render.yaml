@@ -6,7 +6,7 @@ services:
     name: college-portal
     env: python
     buildCommand: ./build.sh
-    startCommand: gunicorn college_portal.wsgi:application
+    startCommand: python manage.py migrate && python manage.py create_superuser && gunicorn college_portal.wsgi:application
     envVars:
       - key: DATABASE_URL
         fromDatabase:
