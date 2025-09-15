@@ -1,0 +1,102 @@
+{% extends "portal/base.html" %}
+
+{% block title %}Program Details - {{ program.name }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section with full-width image -->
+{% if program.name|lower == "mca" %}
+    <div style="width: 100%; margin-bottom: 2rem;">
+        <img src="/static/images/mca hero.png" alt="MCA Hero" style="width: 100%; max-height: 340px; object-fit: cover; display: block; border-radius: 12px;">
+    </div>
+{% endif %}
+
+<!-- About MCA Section (plain, no extra style) -->
+{% if program.name|lower == "mca" %}
+    <h2>About MCA</h2>
+    <p>
+        The Master of Computer Applications (MCA) at Surana College is a 2-year postgraduate program designed to develop advanced skills in computer science, software engineering, and emerging technologies. With a curriculum focused on real-world applications, industry projects, and modern labs, MCA graduates are prepared for top IT roles in software development, data science, and more.
+    </p>
+    <ul>
+        <li><strong>Duration:</strong> 2 Years</li>
+        <li><strong>Eligibility:</strong> Any UG with Math</li>
+        <li><strong>Focus:</strong> Software, Data Science, AI</li>
+        <li><strong>Placement:</strong> 100% Assistance</li>
+        <li><strong>Labs:</strong> Modern &amp; Industry Aligned</li>
+    </ul>
+{% endif %}
+
+<!-- Art Gallery Section -->
+<div class="art-gallery-section" style="margin: 2rem auto; max-width: 900px;">
+    <h2 style="text-align: center; color: #2563eb; font-weight: 700; margin-bottom: 1.5rem;">MCA Fun Gallery</h2>
+    <div class="art-gallery-masonry" style="display: grid; grid-template-areas: 'a a b c' 'd e b c'; grid-template-columns: 1fr 1fr 1fr 1fr; grid-template-rows: 180px 180px; gap: 1.2rem;">
+        <img src="/static/images/mca_art1.jpg" alt="Art 1" style="grid-area: a; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 10px rgba(37,99,235,0.08); cursor: pointer;" onclick="openModal('/static/images/mca_art1.jpg')">
+        <img src="/static/images/mca_art2.jpg" alt="Art 2" style="grid-area: b; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 10px rgba(37,99,235,0.08); cursor: pointer;" onclick="openModal('/static/images/mca_art2.jpg')">
+        <img src="/static/images/mca_art3.jpg" alt="Art 3" style="grid-area: c; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 10px rgba(37,99,235,0.08); cursor: pointer;" onclick="openModal('/static/images/mca_art3.jpg')">
+        <img src="/static/images/mca_art4.jpg" alt="Art 4" style="grid-area: d; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 10px rgba(37,99,235,0.08); cursor: pointer;" onclick="openModal('/static/images/mca_art4.jpg')">
+        <img src="/static/images/mca_art5.jpg" alt="Art 5" style="grid-area: e; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 10px rgba(37,99,235,0.08); cursor: pointer;" onclick="openModal('/static/images/mca_art5.jpg')">
+    </div>
+    <!-- Modal for image preview -->
+    <div id="galleryModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); align-items:center; justify-content:center;">
+        <span onclick="closeModal()" style="position:absolute; top:30px; right:40px; color:#fff; font-size:2.5rem; cursor:pointer; z-index:10001;">&times;</span>
+        <img id="modalImg" src="" alt="Art Preview" style="max-width:90vw; max-height:80vh; border-radius:16px; box-shadow:0 4px 32px rgba(0,0,0,0.25); display:block; margin:auto;">
+    </div>
+    <script>
+        function openModal(src) {
+            document.getElementById('galleryModal').style.display = 'flex';
+            document.getElementById('modalImg').src = src;
+        }
+        function closeModal() {
+            document.getElementById('galleryModal').style.display = 'none';
+            document.getElementById('modalImg').src = '';
+        }
+        // Close modal on background click
+        document.addEventListener('DOMContentLoaded', function() {
+            var modal = document.getElementById('galleryModal');
+            if(modal) {
+                modal.addEventListener('click', function(e) {
+                    if(e.target === modal) closeModal();
+                });
+            }
+        });
+    </script>
+</div>
+
+<div class="card shadow-sm mb-4" style="max-width: 900px; margin: 0 auto 2.5rem auto;">
+    <div class="card-body">
+        <p class="card-text">{{ program.description|linebreaks }}</p>
+        {% if program.video %}
+        <div class="mb-4">
+            <h5 class="border-bottom pb-2 mb-3">Program Video</h5>
+            <video class="program-detail-video" controls autoplay muted poster="{% if program.image %}{{ program.image.url }}{% endif %}" style="width: 100%; max-width: 100%; border-radius: 12px; background: #000;">
+                <source src="{{ program.video.url }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <a href="{{ program.video.url }}" class="btn btn-sm btn-outline-secondary mt-2" download>
+                <i class="fas fa-download mr-1"></i> Download Video
+            </a>
+        </div>
+        {% endif %}
+        {% if program.image %}
+        <div class="mb-4" style="text-align: center;">
+            <img src="{{ program.image.url }}" class="program-detail-image" alt="{{ program.name }} Image" style="width: 100%; max-width: 400px; border-radius: 12px; object-fit: cover; margin: 0 auto; box-shadow: 0 2px 12px rgba(37,99,235,0.08);">
+        </div>
+        {% endif %}
+        <div class="program-detail-brochure" style="text-align: center; margin-top: 1.5rem;">
+            <h5 class="card-title">Program Brochure</h5>
+            <p class="card-text">Click below to download our detailed program brochure.</p>
+            {% if program.brochure %}
+            <a href="{{ program.brochure.url }}" class="btn btn-primary" download style="max-width: 250px; width: 100%;">
+                <i class="fas fa-file-pdf mr-1"></i> Download Brochure (PDF)
+            </a>
+            {% else %}
+            <p class="text-muted">Brochure not available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<div class="text-center mt-4">
+    <a href="{% url 'portal_academics' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left mr-1"></i> Back to All Programs
+    </a>
+</div>
+{% endblock %}

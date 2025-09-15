@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - College Portal</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+
+<body>
+        <!-- Header -->
+        <header style="background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(15,23,42,0.03);">
+            <div class="container" style="display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 0; margin-left:50px">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <img src="/static/img/logo.jpg" alt="College Logo" style="height: 40px; width: 100%; border-radius: 8px; object-fit: contain; padding: 0; background: none;" onerror="this.style.display='none'">
+                </div>
+            </div>
+        </header>
+        <main class="container" style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
+                <div class="card" style="max-width: 410px; width: 100%; margin: 2rem auto; padding: 2.7rem 2rem 2.2rem 2rem; box-shadow: 0 10px 20px rgba(0,0,0,0.5); border-radius: 20px;">
+                    <div class="auth-header" style="text-align: center; margin-bottom: 2.2rem;">
+                        <h1 style="font-size: 2.3rem; color: var(--neon); margin-bottom: 0.5rem; letter-spacing: 0.5px;">Student Login</h1>
+                        
+                    </div>
+                    <!-- Display messages -->
+                    {% if messages %}
+                    <div class="messages" style="margin-bottom: 1rem;">
+                        {% for message in messages %}
+                        <div class="message {{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <form method="post" action="/login/submit/" id="loginForm" style="display: flex; flex-direction: column; gap: 1.2rem;">
+                        {% csrf_token %}
+                        <div>
+                            <label for="email" style="font-weight: 600; color: #334155;">Email or Username</label>
+                            <input type="text" name="email" id="email" required placeholder="Enter your email or username" autocomplete="username" style="margin-top: 0.3rem;" />
+                        </div>
+                        <div>
+                            <label for="password" style="font-weight: 600; color: #334155;">Password</label>
+                            <input type="password" name="password" id="password" required placeholder="Enter your password" autocomplete="current-password" style="margin-top: 0.3rem;" />
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" name="remember_me" id="remember_me" style="width: 16px; height: 16px;" />
+                                <label for="remember_me" style="font-size: 0.97rem; color: #64748b; cursor: pointer;">Remember me</label>
+                            </div>
+                            <a href="/forgot-password/" style="font-size: 0.97rem; color: var(--neon); text-decoration: underline;">Forgot password?</a>
+                        </div>
+                        <button type="submit" class="cta" style="width: 100%; margin-top: 0.5rem;border:none">Login to Portal</button>
+                    </form><br>
+                    <div class="auth-nav" style="flex-direction: row; gap: 1rem; justify-content: center;">
+                            <span class="auth-nav-text">Don't have an account?</span>
+                            <a href="/register/" class="btn btn-secondary">Register</a>
+                        </div>
+                    <div class="login-help" style="margin-top: 2.2rem; text-align: center;">
+                        <a href="/" class="btn btn-secondary" style="width: 100%;">Back to Home</a>
+                        <p style="margin-top: 1rem; color: #64748b; font-size: 0.97rem;">Need help? Contact <a href="mailto:info@college.edu" style="color: var(--neon); text-decoration: underline;">support</a>.</p>
+                    </div>
+                </div>
+            {% comment %} <div class="help-options">
+                <div class="help-item">
+                    <h4>🔐 Forgot Password?</h4>
+                    <p>Contact technical support to reset your password</p>
+                    <a href="mailto:techsupport@college.edu" class="help-link">techsupport@college.edu</a>
+                </div>
+                
+                <div class="help-item">
+                    <h4>📧 Email Not Verified?</h4>
+                    <p>Check your email for verification link or contact support</p>
+                    <a href="mailto:support@college.edu" class="help-link">support@college.edu</a>
+                </div>
+                
+                <div class="help-item">
+                    <h4>🆕 New Student?</h4>
+                    <p>Register for a new account to access the portal</p>
+                    <a href="/register/" class="help-link">Create Account</a>
+                </div>
+            </div>
+        </div> {% endcomment %}
+
+        <div class="security-notice">
+            <h4>🔒 Security Notice</h4>
+            <p>This portal uses secure authentication. Never share your login credentials with anyone. If you suspect unauthorized access, contact support immediately.</p>
+        </div>
+    </main>
+
+    <script>
+        // Client-side form validation and enhancements
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const rememberCheckbox = document.getElementById('remember_me');
+
+            // Auto-focus on email field
+            emailInput.focus();
+
+            // Form submission validation
+            form.addEventListener('submit', function(e) {
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+
+                // Basic validation
+                if (!email || !password) {
+                    e.preventDefault();
+                    alert('Please fill in all required fields.');
+                    return false;
+                }
+
+                // Allow either email or username, so skip strict email format validation
+
+                // Password length validation
+                if (password.length < 6) {
+                    e.preventDefault();
+                    alert('Password must be at least 6 characters long.');
+                    passwordInput.focus();
+                    return false;
+                }
+
+                // Show loading state
+                const submitButton = form.querySelector('button[type="submit"]');
+                submitButton.textContent = 'Logging in...';
+                submitButton.disabled = true;
+            });
+
+            // Handle remember me functionality
+            if (rememberCheckbox) {
+                // Load saved credentials if remember me was checked
+                const savedEmail = localStorage.getItem('remembered_email');
+                if (savedEmail) {
+                    emailInput.value = savedEmail;
+                    rememberCheckbox.checked = true;
+                    passwordInput.focus();
+                }
+
+                // Save credentials when form is submitted
+                form.addEventListener('submit', function() {
+                    if (rememberCheckbox.checked) {
+                        localStorage.setItem('remembered_email', emailInput.value);
+                    } else {
+                        localStorage.removeItem('remembered_email');
+                    }
+                });
+            }
+
+            // Enter key navigation
+            emailInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    passwordInput.focus();
+                }
+            });
+
+            passwordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    form.submit();
+                }
+            });
+
+            // Real-time email validation
+            emailInput.addEventListener('blur', function() {
+                const email = this.value.trim();
+                if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    this.style.borderColor = '#ef4444';
+                    this.title = 'Please enter a valid email address';
+                } else {
+                    this.style.borderColor = '';
+                    this.title = '';
+                }
+            });
+
+            // Password strength indicator (basic)
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                const strength = getPasswordStrength(password);
+                
+                // Remove existing strength indicators
+                const existingIndicator = document.querySelector('.password-strength');
+                if (existingIndicator) {
+                    existingIndicator.remove();
+                }
+
+                if (password.length > 0) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'password-strength';
+                    indicator.innerHTML = `Password strength: ${strength}`;
+                    indicator.style.color = strength === 'Strong' ? '#10b981' : strength === 'Medium' ? '#f59e0b' : '#ef4444';
+                    indicator.style.fontSize = '0.8rem';
+                    indicator.style.marginTop = '0.25rem';
+                    
+                    this.parentNode.appendChild(indicator);
+                }
+            });
+        });
+
+        // Simple password strength checker
+        function getPasswordStrength(password) {
+            if (password.length < 6) return 'Weak';
+            if (password.length < 8) return 'Medium';
+            if (password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password)) return 'Strong';
+            return 'Medium';
+        }
+    </script>
+
+    <style>
+        /* Additional styles for login page */
+        .messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .message.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .form-options {
+            margin: 1.5rem 0;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+
+        .login-help {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .login-help h3 {
+            color: var(--neon);
+            margin-bottom: 1rem;
+        }
+
+        .help-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .help-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .help-item h4 {
+            color: var(--neon);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .help-item p {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .help-link {
+            color: var(--neon);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .help-link:hover {
+            text-decoration: underline;
+        }
+
+        .security-notice {
+            background: rgba(239, 68, 68, 0.1);
+            border:none;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            margin-left: 50px;
+        }
+
+        .security-notice h4 {
+            color: #ef4444;
+            margin-bottom: 0.5rem;
+        }
+
+        .security-notice p {
+            font-size: 0.9rem;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .password-strength {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .help-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+        </main>
+        <!-- Footer -->
+        <footer style="background: #f8fafc; border-top: 1px solid #e5e7eb; padding: 1.5rem 0; margin-top: 0;">
+            <div class="container" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                <div style="color: #64748b; font-size: 1rem;">&copy; {{ now|date:'Y' }} Surana College. All rights reserved.</div>
+                <div style="font-size: 0.95rem; color: #2563eb; opacity: 0.7;">Empowering Education, Inspiring Success</div>
+            </div>
+        </footer>
+</body>
+</html>

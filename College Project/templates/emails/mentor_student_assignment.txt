@@ -1,0 +1,13 @@
+Hello {{ mentor_name }},
+
+You have been assigned a new student to mentor.
+
+Student Details:
+- Name: {{ student_name }}
+- Email: {{ student_email }}
+- Phone: {{ student_phone|default:"Not provided" }}
+
+Please reach out to them to begin the mentorship process.
+
+Thank you,
+Surana College Portal

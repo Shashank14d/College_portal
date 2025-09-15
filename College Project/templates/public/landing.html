@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>College Portal - Welcome</title>
+    <link rel="stylesheet" href="/static/css/styles.css" />
+  </head>
+
+  <body class="landing">
+    <!-- Header -->
+    {% comment %} <header style="background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(15,23,42,0.03);">
+      <div class="container" style="display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 0;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <img src="/static/img/logo.png" alt="College Logo" style="height: 40px; width: 40px; border-radius: 8px; background: #e0e7ef; object-fit: cover;" onerror="this.style.display='none'">
+          <span style="font-size: 1.5rem; font-weight: 700; color: var(--neon); letter-spacing: 1px;">Surana College</span>
+        </div>
+        <nav style="display: flex; gap: 1.5rem;">
+          <a href="/login/" class="btn btn-secondary">Login</a>
+          <a href="/register/" class="cta">Register</a>
+        </nav>
+      </div>
+    </header> {% endcomment %}
+
+
+    <!-- Hero area with glassmorphism, neon accents, and background image -->
+    <main>
+      <div class="hero" style="background: url('/static/img/hero.jpg') center/cover no-repeat; min-height: 100vh; position: relative;">
+        <div class="overlay"></div>
+        <div class="content" style="backdrop-filter: blur(2px); background: rgba(255,255,255,0.85);">
+          <h1 class="title">Welcome to Surana College</h1>
+          <p class="subtitle">Practice for Perfection</p>
+          <a class="cta" href="/register/">Proceed</a>
+        </div>
+      </div>
+    </main>
+
+    {% comment %} <!-- Footer -->
+    <footer style="background: #f8fafc; border-top: 1px solid #e5e7eb; padding: 1.5rem 0; margin-top: 0;">
+      <div class="container" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+        <div style="color: #64748b; font-size: 1rem;">&copy; {{ now|date:'Y' }} Surana College. All rights reserved.</div>
+        <div style="font-size: 0.95rem; color: #2563eb; opacity: 0.7;">Empowering Education, Inspiring Success</div>
+      </div>
+    </footer>
+    <script src="/static/js/landing.js"></script> {% endcomment %}
+  </body>
+  </html>
+
+
+

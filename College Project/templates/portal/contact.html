@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - College Portal</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+        <!-- Header -->
+        <header style="background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(15,23,42,0.03);">
+            <div class="container" style="display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 0; margin-left:50px">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <img src="/static/img/logo.jpg" alt="College Logo" style="height: 40px; width: 100%; border-radius: 8px; object-fit: contain; padding: 0; background: none;" onerror="this.style.display='none'">
+                </div>
+                <nav style="display: flex; gap: 1.5rem;">
+                    <a href="/portal/home/" class="nav-link">Home</a>
+                    <a href="/portal/academics/" class="nav-link">Academics</a>
+                    <a href="/portal/contact/" class="nav-link active">Contact</a>
+                    {% if user.is_staff %}<a href="/director/dashboard/" class="nav-link">Admin</a>{% endif %}
+                    <a href="/logout/" class="nav-link logout">Logout</a>
+                </nav>
+            </div>
+        </header>
+        <div class="container">
+
+        <!-- Contact Introduction -->
+        <div class="contact-intro">
+            <h2><i class="fas fa-headset"></i> Get in Touch</h2>
+            <p>We're here to help! Whether you have questions about academic programs, need technical support, or want to request a mentor, our team is ready to assist you.</p>
+        </div>
+
+        <div class="dashboard-container">
+            <div class="dashboard-main">
+                <!-- Department Contacts -->
+                <div class="dashboard-card department-contacts">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-building"></i>
+                        <h3>Department Contacts</h3>
+                    </div>
+                    <div class="department-grid">
+                        <div class="department-item">
+                            <h4>🎓 Academic Affairs</h4>
+                            <p><strong>Email:</strong> academics@college.edu</p>
+                            <p><strong>Phone:</strong> +1 (555) 123-4568</p>
+                        </div>
+                        <div class="department-item">
+                            <h4>👨‍🏫 Student Services</h4>
+                            <p><strong>Email:</strong> studentservices@college.edu</p>
+                            <p><strong>Phone:</strong> +1 (555) 123-4569</p>
+                        </div>
+                        <div class="department-item">
+                            <h4>💻 Technical Support</h4>
+                            <p><strong>Email:</strong> techsupport@college.edu</p>
+                            <p><strong>Phone:</strong> +1 (555) 123-4570</p>
+                        </div>
+                        <div class="department-item">
+                            <h4>💰 Financial Aid</h4>
+                            <p><strong>Email:</strong> financialaid@college.edu</p>
+                            <p><strong>Phone:</strong> +1 (555) 123-4571</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Section -->
+                <div class="dashboard-card faq-section">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-question-circle"></i>
+                        <h3>Frequently Asked Questions</h3>
+                    </div>
+                    <div class="faq-list">
+                        <div class="faq-item">
+                            <h4>How do I update my profile information?</h4>
+                            <p>You can update your profile by logging into the portal and accessing the profile settings section.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h4>How long does mentor assignment take?</h4>
+                            <p>Mentor assignments are typically processed within 2-3 business days. You'll receive an email notification.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-sidebar">
+                <!-- Contact Methods -->
+                <div class="dashboard-card contact-methods">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-address-book"></i>
+                        <h3>Contact Methods</h3>
+                    </div>
+                    <div class="contact-card" style="border: none; box-shadow: none; padding: 0;">
+                        <h3>📧 General Inquiries</h3>
+                        <p><strong>Email:</strong> 
+                            {% if contact_email %}
+                                <a href="mailto:{{ contact_email.value }}">{{ contact_email.value }}</a>
+                            {% else %}
+                                info@college.edu
+                            {% endif %}
+                        </p>
+                        <p><strong>Response Time:</strong> Within 24 hours</p>
+                    </div>
+                    <div class="contact-card" style="border: none; box-shadow: none; padding: 0; margin-top: 1rem;">
+                        <h3>📞 Phone Support</h3>
+                        <p><strong>Phone:</strong> 
+                            {% if contact_phone %}
+                                <a href="tel:{{ contact_phone.value }}">{{ contact_phone.value }}</a>
+                            {% else %}
+                                +1 (555) 123-4567
+                            {% endif %}
+                        </p>
+                        <p><strong>Hours:</strong> Mon-Fri, 9am-5pm</p>
+                    </div>
+                </div>
+
+                <!-- Mentor Section -->
+                {% if not has_mentor %}
+                <div class="dashboard-card mentor-request-section">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-user-plus"></i>
+                        <h3>Request a Mentor</h3>
+                    </div>
+                    <p>Need personalized guidance? Request a mentor to help you navigate your academic journey.</p>
+                    <a href="/portal/request-mentor/" class="cta" style="margin-top: 1rem;">Request Mentor</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+        </div>
+        <!-- Footer -->
+        <footer style="background: #f8fafc; border-top: 1px solid #e5e7eb; padding: 1.5rem 0; margin-top: 2rem;">
+            <div class="container" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                <div style="color: #64748b; font-size: 1rem;">&copy; {{ now|date:'Y' }} Surana College. All rights reserved.</div>
+                <div style="font-size: 0.95rem; color: #2563eb; opacity: 0.7;">Empowering Education, Inspiring Success</div>
+            </div>
+        </footer>
+</body>
+</html>

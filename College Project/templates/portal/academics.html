@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academics - College Portal</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+        <!-- Header -->
+        <header style="background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(15,23,42,0.03);">
+            <div class="container" style="display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 0; margin-left:50px">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <img src="/static/img/logo.jpg" alt="College Logo" style="height: 40px; width: 100%; border-radius: 8px; object-fit: contain; padding: 0; background: none;" onerror="this.style.display='none'">
+                </div>
+                <nav style="display: flex; gap: 1.5rem;">
+                    <a href="/portal/home/" class="nav-link">Home</a>
+                    <a href="/portal/academics/" class="nav-link active">Academics</a>
+                    <a href="/portal/contact/" class="nav-link">Contact</a>
+                    {% if user.is_staff %}<a href="/director/dashboard/" class="nav-link">Admin</a>{% endif %}
+                    <a href="/logout/" class="nav-link logout">Logout</a>
+                </nav>
+            </div>
+        </header>
+        <div class="container">
+
+        <!-- Academics Introduction -->
+        <div class="academics-intro">
+            <h2><i class="fas fa-graduation-cap"></i> Explore Our Academic Programs</h2>
+            <p>Discover the wide range of undergraduate and postgraduate programs we offer. Each program is designed to provide comprehensive education and practical skills for your future career.</p>
+        </div>
+
+        <div class="dashboard-container">
+            <div class="dashboard-main">
+                <!-- Programs Section -->
+                <div class="dashboard-card programs-section">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-book"></i>
+                        <h3>Available Programs</h3>
+                    </div>
+                    {% if programs %}
+                    <div class="programs-grid">
+                        {% for program in programs %}
+                        <a href="{% url 'program_detail' program.id %}" class="program-card-link">
+                            <div class="program-card">
+                                <div class="program-card-image" style="background-image: url('{{ program.image.url }}');"></div>
+                                <div class="program-card-content">
+                                    <h4>{{ program.name }}</h4>
+                                    <p>{{ program.description|truncatewords:20 }}</p>
+                                    <div class="program-meta">
+                                        <span class="level-badge">Program</span>
+                                        <span class="updated">View Details <i class="fas fa-arrow-right"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="no-programs">
+                        <h3>No Programs Available</h3>
+                        <p>Program information is being updated. Please check back later or contact administration for more details.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Your Academic Records -->
+                <div class="dashboard-card your-academics">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-file-alt"></i>
+                        <h3>Your Academic Records</h3>
+                    </div>
+                    {% if user.academics.all %}
+                    <div class="academic-records-list">
+                        {% for record in user.academics.all %}
+                        <div class="academic-record-item">
+                            <div class="record-header">
+                                <h4>{{ record.level }} - {{ record.degree }}</h4>
+                                <span class="record-year">{{ record.year }}</span>
+                            </div>
+                            <div class="record-details">
+                                <p><strong>Institution:</strong> {{ record.institution }}</p>
+                                <p><strong>Percentage:</strong> {{ record.percentage }}%</p>
+                                <p><strong>Completed:</strong> {{ record.created_at|date:"M d, Y" }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p>No academic records found. You can add your academic history during registration or by contacting administration.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="dashboard-sidebar">
+                <!-- Academic Resources -->
+                <div class="dashboard-card academic-resources">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-cogs"></i>
+                        <h3>Academic Resources</h3>
+                    </div>
+                    <div class="resources-grid">
+                        <div class="resource-item">
+                            <h4>📚 Course Catalog</h4>
+                            <p>Detailed information about all courses and prerequisites</p>
+                        </div>
+                        <div class="resource-item">
+                            <h4>📅 Academic Calendar</h4>
+                            <p>Important dates, deadlines, and academic events</p>
+                        </div>
+                        <div class="resource-item">
+                            <h4>🎓 Graduation Requirements</h4>
+                            <p>Understand what you need to complete your degree</p>
+                        </div>
+                        <div class="resource-item">
+                            <h4>📊 Grade Policies</h4>
+                            <p>Grading criteria and academic policies</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Academic Support -->
+                <div class="dashboard-card academic-support">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-hands-helping"></i>
+                        <h3>Academic Support</h3>
+                    </div>
+                    <p>We provide comprehensive support to help you succeed:</p>
+                    <ul class="support-list">
+                        <li><strong>Tutoring Services</strong></li>
+                        <li><strong>Study Groups</strong></li>
+                        <li><strong>Academic Advising</strong></li>
+                        <li><strong>Library Resources</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+        <!-- Footer -->
+        <footer style="background: #f8fafc; border-top: 1px solid #e5e7eb; padding: 1.5rem 0; margin-top: 2rem;">
+            <div class="container" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                <div style="color: #64748b; font-size: 1rem;">&copy; {{ now|date:'Y' }} Surana College. All rights reserved.</div>
+                <div style="font-size: 0.95rem; color: #2563eb; opacity: 0.7;">Empowering Education, Inspiring Success</div>
+            </div>
+        </footer>
+</body>
+</html>

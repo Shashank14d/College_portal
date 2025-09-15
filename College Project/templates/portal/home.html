@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Home - College Portal</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script defer src="/static/js/portal.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header style="background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(15,23,42,0.03);">
+      <div class="container" style="display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 0; margin-left:50px">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <img src="/static/img/logo.jpg" alt="College Logo" style="height: 40px; width: 100%; border-radius: 8px; object-fit: contain; padding: 0; background: none;" onerror="this.style.display='none'">
+        </div>
+        <nav style="display: flex; gap: 1.5rem;">
+          <a href="/portal/home/" class="nav-link active">Home</a>
+          <a href="/portal/academics/" class="nav-link">Academics</a>
+          <a href="/portal/contact/" class="nav-link">Contact</a>
+          {% if user.is_staff %}<a href="/director/dashboard/" class="nav-link">Admin</a>{% endif %}
+          <a href="/logout/" class="nav-link logout">Logout</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="container">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h2>Hello, {{ user.get_full_name|default:user.first_name|default:user.username }}! 👋</h2>
+            <p>Welcome to your personalized college portal. Here's a summary of your profile and quick access to important resources.</p>
+        </div>
+
+        <div class="dashboard-container">
+            <div class="dashboard-main">
+                <!-- Quick Actions -->
+                <div class="dashboard-card quick-actions">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-bolt"></i>
+                        <h3>Quick Actions</h3>
+                    </div>
+                    <div class="action-grid">
+                        <a href="/portal/academics/" class="action-card">
+                            <i class="fas fa-book-open"></i>
+                            <div>
+                                <h4>Academic Programs</h4>
+                                <p>Explore courses and programs</p>
+                            </div>
+                        </a>
+                        <a href="/portal/contact/" class="action-card">
+                            <i class="fas fa-phone-alt"></i>
+                            <div>
+                                <h4>Contact Us</h4>
+                                <p>Get in touch with support</p>
+                            </div>
+                        </a>
+                        {% if user.is_staff %}
+                        <a href="/director/dashboard/" class="action-card">
+                            <i class="fas fa-user-shield"></i>
+                            <div>
+                                <h4>Admin Dashboard</h4>
+                                <p>Access admin tools</p>
+                            </div>
+                        </a>
+                        {% endif %}
+                        <a href="/portal/contact/" class="action-card">
+                            <i class="fas fa-cog"></i>
+                            <div>
+                                <h4>Profile Settings</h4>
+                                <p>Update your information</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Mentor Information -->
+                {% if user.profile.assigned_mentor %}
+                <div class="dashboard-card mentor-info">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-user-tie"></i>
+                        <h3>Your Mentor</h3>
+                    </div>
+                    <div class="mentor-card" style="border: none; box-shadow: none; padding: 0;">
+                        <h4>{{ user.profile.assigned_mentor.name }}</h4>
+                        <p><strong>Email:</strong> {{ user.profile.assigned_mentor.email }}</p>
+                        {% if user.profile.assigned_mentor.portfolio_url %}
+                        <p><strong>Portfolio:</strong> <a href="{{ user.profile.assigned_mentor.portfolio_url }}" target="_blank">View Portfolio</a></p>
+                        {% endif %}
+                        {% if user.profile.assigned_mentor.whatsapp_group_link %}
+                        <p><strong>WhatsApp Group:</strong> <a href="{{ user.profile.assigned_mentor.whatsapp_group_link }}" target="_blank">Join Group</a></p>
+                        {% endif %}
+                        {% if user.profile.assigned_mentor.bio %}
+                        <p><strong>Bio:</strong> {{ user.profile.assigned_mentor.bio }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="dashboard-card mentor-request">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-user-plus"></i>
+                        <h3>Request a Mentor</h3>
+                    </div>
+                    {% if user.mentor_requests.exists %}
+                        <p>Your mentor request is currently <strong>{{ user.mentor_requests.last.get_status_display }}</strong>.</p>
+                        <button class="cta" style="margin-top: 1rem;" disabled>Request Submitted</button>
+                    {% else %}
+                        <p>Don't have a mentor yet? Request one to get personalized guidance and support throughout your academic journey.</p>
+                        <a href="{% url 'request_mentor' %}" class="cta" style="margin-top: 1rem;">Request Mentor</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Academic Records Summary -->
+                {% if user.academics.all %}
+                <div class="dashboard-card academic-summary">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h3>Your Academic Records</h3>
+                    </div>
+                    <div class="academic-list">
+                        {% for record in user.academics.all %}
+                        <div class="academic-item">
+                            <strong>{{ record.level }} - {{ record.degree }}</strong><br>
+                            <span>{{ record.institution }} ({{ record.year }}) - {{ record.percentage }}%</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="dashboard-sidebar">
+                <!-- Profile Summary -->
+                <div class="dashboard-card profile-summary">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-user-circle"></i>
+                        <h3>Your Profile</h3>
+                    </div>
+                    <div class="profile-grid">
+                        <div class="profile-item">
+                            <i class="fas fa-user"></i>
+                            <div><strong>Name:</strong> {{ user.profile.full_name }}</div>
+                        </div>
+                        <div class="profile-item">
+                            <i class="fas fa-envelope"></i>
+                            <div><strong>Email:</strong> {{ user.email }}</div>
+                        </div>
+                        <div class="profile-item">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <strong>Status:</strong>
+                                <span class="status {% if user.profile.verified %}verified{% else %}pending{% endif %}">
+                                    {% if user.profile.verified %}Verified{% else %}Pending{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="profile-item">
+                            <i class="fas fa-phone"></i>
+                            <div><strong>Phone:</strong> {{ user.profile.phone|default:"N/A" }}</div>
+                        </div>
+                        <div class="profile-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div><strong>City:</strong> {{ user.profile.city|default:"N/A" }}</div>
+                        </div>
+                        <div class="profile-item">
+                            <i class="fas fa-tasks"></i>
+                            <div><strong>CET Status:</strong> {% if user.profile.cet_taken %}Taken{% else %}Not Taken{% endif %}</div>
+                        </div>
+                        <div class="profile-item">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <div>
+                                <strong>Mentor:</strong>
+                                {% if user.profile.assigned_mentor %}
+                                    <span class="mentor-assigned">{{ user.profile.assigned_mentor.name }}</span>
+                                {% else %}
+                                    <span class="no-mentor">Not Assigned</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="dashboard-card recent-activity">
+                    <div class="dashboard-card-header">
+                        <i class="fas fa-history"></i>
+                        <h3>Recent Activity</h3>
+                    </div>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <span class="activity-icon">✅</span>
+                            <div>
+                                <span>Account verified</span>
+                                <div class="activity-time" style="font-size: 0.8rem; opacity: 0.7;">{{ user.profile.created_at|date:"M d, Y" }}</div>
+                            </div>
+                        </div>
+                        {% if user.profile.assigned_mentor %}
+                        <div class="activity-item">
+                            <span class="activity-icon">👨‍🏫</span>
+                            <div>
+                                <span>Mentor assigned</span>
+                                <div class="activity-time" style="font-size: 0.8rem; opacity: 0.7;">Recently</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="activity-item">
+                            <span class="activity-icon">🔐</span>
+                            <div>
+                                <span>Last login</span>
+                                <div class="activity-time" style="font-size: 0.8rem; opacity: 0.7;">{{ user.last_login|date:"M d, Y H:i" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer -->
+    <footer style="background: #f8fafc; border-top: 1px solid #e5e7eb; padding: 1.5rem 0; margin-top: 2rem;">
+      <div class="container" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+        <div style="color: #64748b; font-size: 1rem;">&copy; {{ now|date:'Y' }} Surana College. All rights reserved.</div>
+        <div style="font-size: 0.95rem; color: #2563eb; opacity: 0.7;">Empowering Education, Inspiring Success</div>
+      </div>
+    </footer>
+</body>
+</html>

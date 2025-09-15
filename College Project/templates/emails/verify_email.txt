@@ -1,0 +1,48 @@
+Welcome to College Portal - Email Verification
+
+Hello {{ full_name }}!
+
+Thank you for registering with our College Portal. We're excited to have you join our academic community!
+
+To complete your registration and access all portal features, please verify your email address by visiting this link:
+
+{{ verify_link }}
+
+IMPORTANT: This verification link will expire in 24 hours. If you don't verify your email within this time, you'll need to register again.
+
+TERMS & CONDITIONS
+==================
+
+By verifying your email and using our portal, you agree to:
+- Provide accurate and truthful information
+- Use the portal for legitimate academic purposes only
+- Respect the privacy and rights of other users
+- Follow all college policies and guidelines
+- Maintain the confidentiality of your account credentials
+- Report any suspicious activity or security concerns
+
+We reserve the right to suspend or terminate accounts that violate these terms.
+
+Once verified, you'll be able to:
+- Access academic programs and course information
+- Request mentor assignment
+- View and update your academic records
+- Contact college administration
+- Participate in college community features
+
+If you didn't register for this account, please ignore this email.
+
+For support, contact us at support@college.edu
+
+---
+This email was sent from {{ site_url }}
+
+
+
+
+
+
+
+
+
+

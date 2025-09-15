@@ -1,0 +1,39 @@
+Mentor Assignment - College Portal
+
+Hello {{ student_name }}!
+
+Great news! A mentor has been assigned to guide you through your academic journey.
+
+YOUR MENTOR: {{ mentor_name }}
+
+Your mentor is ready to provide guidance, support, and academic assistance throughout your college experience.
+
+NEXT STEPS:
+===========
+
+1. Contact Your Mentor: Reach out to introduce yourself and discuss your academic goals
+2. Join WhatsApp Group: Connect with your mentor and other students for ongoing support
+3. Review Portfolio: Learn about your mentor's background and expertise
+4. Set Up Meetings: Schedule regular check-ins with your mentor
+5. Stay Engaged: Participate actively in discussions and ask questions
+
+MENTOR RESOURCES:
+================
+
+{% if portfolio_url %}
+Portfolio: {{ portfolio_url }}
+{% endif %}
+
+{% if whatsapp_link %}
+WhatsApp Group: {{ whatsapp_link }}
+{% endif %}
+
+PRO TIP: Your mentor is here to help you succeed. Don't hesitate to reach out with questions about courses, career guidance, or any academic challenges you're facing.
+
+Your mentor assignment is now active and you can start building a productive relationship that will support your academic success.
+
+If you have any questions about your mentor assignment or need assistance, please don't hesitate to contact our support team.
+
+---
+This notification was sent from {{ site_url }}
+For support, contact us at support@college.edu

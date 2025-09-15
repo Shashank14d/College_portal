@@ -1,0 +1,12 @@
+A new mentor request has been submitted by a student.
+
+Student Details:
+- Name: {{ user.get_full_name|default:user.username }}
+- Email: {{ user.email }}
+
+Please visit the director's dashboard to review the request and assign a mentor.
+
+Dashboard Link: {{ dashboard_url }}
+
+Thank you,
+Surana College Portal

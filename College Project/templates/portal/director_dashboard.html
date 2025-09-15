@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Director Dashboard - College Portal</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script defer src="/static/js/director.js"></script>
+</head>
+
+<body>
+        <!-- Header -->
+        <header style="background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(15,23,42,0.03);">
+            <div class="container" style="display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 0; margin-left:50px">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                        <img src="/static/img/logo.jpg" alt="College Logo" style="height: 40px; width: 100%; border-radius: 8px; object-fit: contain; padding: 0; background: none;" onerror="this.style.display='none'">
+                </div>
+                <nav style="display: flex; gap: 1.5rem;">
+                    <a href="/director/dashboard/" class="nav-link active">Director Dashboard</a>
+                    <a href="/admin/" class="nav-link">Admin Panel</a>
+                    <a href="/logout/" class="nav-link logout">Logout</a>
+                </nav>
+            </div>
+        </header>
+        <div class="container">
+
+        <!-- Dashboard Overview -->
+        <div class="dashboard-overview">
+            <h2>Portal Analytics & Management</h2>
+            <div class="stats-grid">
+                <a class="stat-card" href="/admin/core/visitor/">
+                    <h3>Total Visitors</h3>
+                    <div class="stat-number">{{ counts.visitors }}</div>
+                    <p>Unique visitors to the portal</p>
+                </a>
+                <a class="stat-card" href="/admin/core/userprofile/">
+                    <h3>Total Registrations</h3>
+                    <div class="stat-number">{{ counts.registrations }}</div>
+                    <p>Students registered in the system</p>
+                </a>
+                <a class="stat-card" href="#pending-requests">
+                    <h3>Pending Mentor Assignments</h3>
+                    <div class="stat-number">{{ counts.pending_mentor_assignments }}</div>
+                    <p>Students awaiting mentor assignment</p>
+                </a>
+                <a class="stat-card" href="/admin/core/mentor/">
+                    <h3>Active Mentors</h3>
+                    <div class="stat-number">{{ counts.mentors }}</div>
+                    <p>Mentors available for assignment</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h2>Quick Actions</h2>
+            <div class="action-buttons">
+                <a href="/admin/" class="btn-large">
+                    <h4>👥 Manage Users</h4>
+                    <p>View and manage user accounts</p>
+                </a>
+                <a href="/admin/core/mentor/" class="btn-large">
+                    <h4>👨‍🏫 Manage Mentors</h4>
+                    <p>Add, edit, or remove mentors</p>
+                </a>
+                <a href="/admin/core/pagecontent/" class="btn-large">
+                    <h4>📝 Edit Content</h4>
+                    <p>Update portal content and programs</p>
+                </a>
+                <a href="/admin/core/visitor/" class="btn-large">
+                    <h4>📊 View Analytics</h4>
+                    <p>Detailed visitor and usage statistics</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Mentor Assignment Section -->
+        <div class="mentor-assignment-section">
+            <h2>Assign Mentor to Student</h2>
+            <form method="post" action="{% url 'assign_mentor' %}" class="mentor-form">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="user_id">Select Student:</label>
+                        <select name="user_id" id="user_id" required>
+                            <option value="">Choose a student...</option>
+                            {% for user_profile in users_for_assignment %}
+                            <option value="{{ user_profile.user.id }}">
+                                {{ user_profile.user.get_full_name|default:user_profile.user.username }} 
+                                ({{ user_profile.user.email }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="mentor_id">Select Mentor:</label>
+                        <select name="mentor_id" id="mentor_id" required>
+                            <option value="">Choose a mentor...</option>
+                            {% for mentor in mentors %}
+                            <option value="{{ mentor.id }}">{{ mentor.name }} ({{ mentor.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="cta">Assign Mentor</button>
+            </form>
+        </div>
+
+        <!-- Pending Mentor Requests -->
+        <div class="recent-registrations" id="pending-requests">
+            <h2>Pending Mentor Requests</h2>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Email</th>
+                            <th>Requested On</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in mentor_requests %}
+                        <tr>
+                            <td>{{ req.user.get_full_name|default:req.user.username }}</td>
+                            <td>{{ req.user.email }}</td>
+                            <td>{{ req.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <button class="btn-small edit-btn" onclick="document.getElementById('user_id').value = '{{ req.user.id }}'; document.getElementById('mentor_id').focus();">
+                                    Assign Mentor
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="no-data">No pending mentor requests</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Registrations -->
+        <div class="recent-registrations">
+            <h2>Recent Student Registrations</h2>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>City</th>
+                            <th>Status</th>
+                            <th>Mentor</th>
+                            <th>Registered</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in all_users %}
+                        <tr class="user-row" data-user-id="{{ user.user.id }}">
+                            <td>{{ user.user.get_full_name|default:user.user.username }}</td>
+                            <td>{{ user.user.email }}</td>
+                            <td>{{ user.phone|default:"Not provided" }}</td>
+                            <td>{{ user.city|default:"Not provided" }}</td>
+                            <td>
+                                <span class="status-badge {% if user.verified %}verified{% else %}pending{% endif %}">
+                                    {% if user.verified %}Verified{% else %}Pending{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% if user.assigned_mentor %}
+                                    <span class="mentor-assigned">{{ user.assigned_mentor.name }}</span>
+                                {% else %}
+                                    <span class="no-mentor">Not Assigned</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    {% if not user.verified %}
+                                    <button class="btn-small verify-btn" onclick="verifyUser({{ user.user.id }})">Verify</button>
+                                    {% endif %}
+                                    <a href="/admin/core/userprofile/{{ user.id }}/change/" class="btn-small edit-btn">Edit</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="no-data">No registrations found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mentor Management -->
+        <div class="mentor-management">
+            <h2>Available Mentors</h2>
+            <div class="mentor-grid">
+                {% for mentor in mentors %}
+                <div class="mentor-profile">
+                    <h4>{{ mentor.name }}</h4>
+                    <p><strong>Email:</strong> {{ mentor.email }}</p>
+                    {% if mentor.portfolio_url %}
+                    <p><strong>Portfolio:</strong> <a href="{{ mentor.portfolio_url }}" target="_blank">View Portfolio</a></p>
+                    {% endif %}
+                    {% if mentor.whatsapp_group_link %}
+                    <p><strong>WhatsApp:</strong> <a href="{{ mentor.whatsapp_group_link }}" target="_blank">Group Link</a></p>
+                    {% endif %}
+                    {% if mentor.bio %}
+                    <p><strong>Bio:</strong> {{ mentor.bio|truncatewords:20 }}</p>
+                    {% endif %}
+                    <div class="mentor-actions">
+                        <a href="/admin/core/mentor/{{ mentor.id }}/change/" class="btn-small edit-btn">Edit</a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-data">
+                    <h3>No Mentors Available</h3>
+                    <p>Add mentors through the admin interface to enable mentor assignments.</p>
+                    <a href="/admin/core/mentor/add/" class="cta">Add First Mentor</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="system-status">
+            <h2>System Status</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <h4>Database</h4>
+                    <span class="status-indicator online">Online</span>
+                </div>
+                <div class="status-item">
+                    <h4>Email Service</h4>
+                    <span class="status-indicator online">Online</span>
+                </div>
+                <div class="status-item">
+                    <h4>WhatsApp API</h4>
+                    <span class="status-indicator online">Online</span>
+                </div>
+                <div class="status-item">
+                    <h4>Portal</h4>
+                    <span class="status-indicator online">Online</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Options -->
+        <div class="export-section">
+            <h2>Data Export</h2>
+            <div class="export-buttons">
+                <a href="/admin/core/userprofile/?export=csv" class="btn-large">
+                    <h4>📊 Export Users</h4>
+                    <p>Download user data as CSV</p>
+                </a>
+                <a href="/admin/core/visitor/?export=csv" class="btn-large">
+                    <h4>📈 Export Analytics</h4>
+                    <p>Download visitor statistics</p>
+                </a>
+                <a href="/admin/core/registrationlog/?export=csv" class="btn-large">
+                    <h4>📋 Export Logs</h4>
+                    <p>Download registration logs</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript for director dashboard functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle user selection for mentor assignment
+            const userSelect = document.getElementById('user_id');
+            const mentorSelect = document.getElementById('mentor_id');
+            
+            if (userSelect && mentorSelect) {
+                userSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    if (selectedOption.text.includes('Already has mentor')) {
+                        alert('This student already has a mentor assigned.');
+                    }
+                });
+            }
+            
+            // Handle form submission
+            const mentorForm = document.querySelector('.mentor-form');
+            if (mentorForm) {
+                mentorForm.addEventListener('submit', function(e) {
+                    const userId = userSelect.value;
+                    const mentorId = mentorSelect.value;
+                    
+                    if (!userId || !mentorId) {
+                        e.preventDefault();
+                        alert('Please select both a student and a mentor.');
+                        return false;
+                    }
+                    
+                    if (!confirm('Are you sure you want to assign this mentor to the selected student?')) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            }
+        });
+        
+        // Function to verify a user (placeholder - would need AJAX implementation)
+        function verifyUser(userId) {
+            if (confirm('Are you sure you want to verify this user?')) {
+                // This would typically make an AJAX call to verify the user
+                alert('User verification functionality would be implemented here.');
+            }
+        }
+    </script>
+        </div>
+        <!-- Footer -->
+        <footer style="background: #f8fafc; border-top: 1px solid #e5e7eb; padding: 1.5rem 0; margin-top: 0;">
+            <div class="container" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                <div style="color: #64748b; font-size: 1rem;">&copy; {{ now|date:'Y' }} Surana College. All rights reserved.</div>
+                <div style="font-size: 0.95rem; color: #2563eb; opacity: 0.7;">Empowering Education, Inspiring Success</div>
+            </div>
+        </footer>
+</body>
+</html>
