@@ -75,10 +75,11 @@ from .models import (
 	Visitor,
 )
 from .utils import (
-	send_verification_email, 
-	send_mentor_assignment, 
+	send_verification_email,
+	send_mentor_assignment,
 	send_whatsapp_message,
-	send_mentor_notification_to_mentor
+	send_mentor_notification_to_mentor,
+	send_registration_email,
 )
 
 
@@ -188,9 +189,31 @@ def register_post(request: HttpRequest) -> HttpResponse:
 		expires_at=timezone.now() + timedelta(hours=24),
 	)
 
-	# Send email with link to the main portal; user must log in there
-	portal_link = f"{os.getenv('SITE_BASE_URL', 'http://localhost:8000')}/portal/home/"
-	send_verification_email(to_email=email, full_name=full_name, verify_link=portal_link)
+	# Send a single registration email (welcome + portal link) and attach brochure if available
+	portal_link = f"{os.getenv('SITE_BASE_URL', 'http://localhost:8000')}/login/"
+
+	# Prefer program-specific brochure (MCA) located in static/brochures or program.brochure
+	brochure_path = None
+	# Check for a static brochure file first
+	static_brochure = os.path.join(settings.BASE_DIR, 'static', 'brochures', 'mca_brochure.pdf')
+	if os.path.exists(static_brochure):
+		brochure_path = static_brochure
+	else:
+		# If a Program named 'MCA' exists with a brochure field, use it
+		try:
+			mca_program = Program.objects.filter(name__iexact='mca').first()
+			if mca_program and mca_program.brochure:
+				# Program.brochure is a FileField; build absolute filesystem path
+				brochure_path = mca_program.brochure.path if hasattr(mca_program.brochure, 'path') else None
+		except Exception:
+			brochure_path = None
+
+	# Use the consolidated registration email sender
+	try:
+		send_registration_email(user, full_name, portal_link, brochure_path=brochure_path)
+	except Exception:
+		# Fallback to verification email if registration email fails
+		send_verification_email(to_email=email, full_name=full_name, verify_link=portal_link)
 
 	RegistrationLog.objects.create(user=user, ip=request.META.get("REMOTE_ADDR"), status="submitted")
 	messages.success(request, "Registration successful. Check your email for the portal link and then log in.")
@@ -345,28 +368,30 @@ def director_dashboard(request: HttpRequest) -> HttpResponse:
 	
 	mentor_requests = MentorRequest.objects.filter(status="pending").select_related("user")
 
-	counts = {
-		"visitors": Visitor.objects.count(),
-		"registrations": UserProfile.objects.select_related("user").filter(user__is_staff=False, user__is_superuser=False).count(),
-		"pending_mentor_assignments": mentor_requests.count(),
-		"mentors": Mentor.objects.count(),
-	}
-	
-	# Show users without mentors in the assignment dropdown for clarity
+	# Only show users who do NOT have a mentor AND do NOT have an approved mentor request
 	users_for_assignment = UserProfile.objects.filter(
-		assigned_mentor__isnull=True, user__is_staff=False, user__is_superuser=False
-	).select_related("user")
+		assigned_mentor__isnull=True,
+		user__is_staff=False,
+		user__is_superuser=False
+	).exclude(user__mentor_requests__status="approved").select_related("user")
 
 	# For the general list, show all recent users
 	all_users = UserProfile.objects.select_related("user").filter(user__is_staff=False, user__is_superuser=False).order_by("-created_at")[:50]
-	
+
 	mentors = Mentor.objects.all()
-	
+
+	counts = {
+		"visitors": Visitor.objects.count(),
+		"registrations": UserProfile.objects.select_related("user").filter(user__is_staff=False, user__is_superuser=False).count(),
+		"pending_mentor_assignments": users_for_assignment.count(),
+		"mentors": mentors.count(),
+	}
+
 	return render(
-		request, 
-		"portal/director_dashboard.html", 
+		request,
+		"portal/director_dashboard.html",
 		{
-			"counts": counts, 
+			"counts": counts,
 			"users_for_assignment": users_for_assignment,
 			"all_users": all_users,
 			"mentors": mentors,
@@ -417,10 +442,12 @@ def assign_mentor(request: HttpRequest) -> HttpResponse:
 		portfolio_url=mentor.portfolio_url,
 		whatsapp_link=mentor.whatsapp_group_link,
 	)
-	# Send notification to the mentor
-	send_mentor_notification_to_mentor(mentor, user)
-	
-	messages.success(request, f"Mentor '{mentor.name}' assigned to '{student_name}' and notifications triggered.")
+	send_mentor_notification_to_mentor(
+		mentor=mentor,
+		user=user,
+	)
+
+	messages.success(request, f"Successfully assigned {mentor.name} to {student_name}.")
 	return redirect("director_dashboard")
 
 

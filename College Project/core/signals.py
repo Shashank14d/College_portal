@@ -141,32 +141,11 @@ def log_registration_events(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def send_welcome_email(sender, instance, created, **kwargs):
     """Send welcome email to new users."""
-    if created and instance.email:
-        try:
-            subject = "Welcome to College Portal"
-            message = f"""
-            Hello {instance.get_full_name() or instance.username},
-            
-            Welcome to the College Portal! Your account has been created successfully.
-            
-            Please check your email for verification instructions to activate your account.
-            
-            Best regards,
-            College Portal Team
-            """
-            
-            send_mail(
-                subject=subject,
-                message=message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[instance.email],
-                fail_silently=True
-            )
-            
-            logger.info(f"Welcome email sent to {instance.email}")
-            
-        except Exception as e:
-            logger.error(f"Failed to send welcome email to {instance.email}: {e}")
+    # Welcome emails are sent explicitly from registration flow to avoid duplicate
+    # emails being sent by both the view and signal handlers. This receiver intentionally
+    # does not send an email. It remains to log user creation events only.
+    if created:
+        logger.info(f"User created (no automatic welcome sent): {instance.username}")
 
 @receiver(post_save, sender=UserProfile)
 def handle_profile_verification(sender, instance, **kwargs):

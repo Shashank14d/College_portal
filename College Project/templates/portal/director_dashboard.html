@@ -141,6 +141,42 @@
             </div>
         </div>
 
+        <!-- Students Awaiting Mentor Assignment -->
+        <div class="recent-registrations" id="awaiting-assignment">
+            <h2>Students Awaiting Mentor Assignment</h2>
+            <p>This list includes all registered students who do not currently have a mentor.</p>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Email</th>
+                            <th>Registered On</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user_profile in users_for_assignment %}
+                        <tr>
+                            <td>{{ user_profile.user.get_full_name|default:user_profile.user.username }}</td>
+                            <td>{{ user_profile.user.email }}</td>
+                            <td>{{ user_profile.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <button class="btn-small edit-btn" onclick="document.getElementById('user_id').value = '{{ user_profile.user.id }}'; document.getElementById('mentor_id').focus();">
+                                    Assign Mentor
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="no-data">All students have been assigned a mentor.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Recent Registrations -->
         <div class="recent-registrations">
             <h2>Recent Student Registrations</h2>
@@ -159,31 +195,31 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for user in all_users %}
-                        <tr class="user-row" data-user-id="{{ user.user.id }}">
-                            <td>{{ user.user.get_full_name|default:user.user.username }}</td>
-                            <td>{{ user.user.email }}</td>
-                            <td>{{ user.phone|default:"Not provided" }}</td>
-                            <td>{{ user.city|default:"Not provided" }}</td>
+                        {% for user_profile in all_users %}
+                        <tr class="user-row" data-user-id="{{ user_profile.user.id }}">
+                            <td>{{ user_profile.user.get_full_name|default:user_profile.user.username }}</td>
+                            <td>{{ user_profile.user.email }}</td>
+                            <td>{{ user_profile.phone|default:"Not provided" }}</td>
+                            <td>{{ user_profile.city|default:"Not provided" }}</td>
                             <td>
-                                <span class="status-badge {% if user.verified %}verified{% else %}pending{% endif %}">
-                                    {% if user.verified %}Verified{% else %}Pending{% endif %}
+                                <span class="status-badge {% if user_profile.verified %}verified{% else %}pending{% endif %}">
+                                    {% if user_profile.verified %}Verified{% else %}Pending{% endif %}
                                 </span>
                             </td>
                             <td>
-                                {% if user.assigned_mentor %}
-                                    <span class="mentor-assigned">{{ user.assigned_mentor.name }}</span>
+                                {% if user_profile.assigned_mentor %}
+                                    <span class="mentor-assigned">{{ user_profile.assigned_mentor.name }}</span>
                                 {% else %}
                                     <span class="no-mentor">Not Assigned</span>
                                 {% endif %}
                             </td>
-                            <td>{{ user.created_at|date:"M d, Y" }}</td>
+                            <td>{{ user_profile.created_at|date:"M d, Y" }}</td>
                             <td>
                                 <div class="action-buttons">
-                                    {% if not user.verified %}
-                                    <button class="btn-small verify-btn" onclick="verifyUser({{ user.user.id }})">Verify</button>
+                                    {% if not user_profile.verified %}
+                                    <button class="btn-small verify-btn" onclick="verifyUser({{ user_profile.user.id }})">Verify</button>
                                     {% endif %}
-                                    <a href="/admin/core/userprofile/{{ user.id }}/change/" class="btn-small edit-btn">Edit</a>
+                                    <a href="/admin/core/userprofile/{{ user_profile.id }}/change/" class="btn-small edit-btn">Edit</a>
                                 </div>
                             </td>
                         </tr>

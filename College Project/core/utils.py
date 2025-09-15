@@ -310,6 +310,59 @@ College Portal Team"""
         return False
 
 
+def send_registration_email(user, full_name: str, portal_link: str, brochure_path: str = None) -> bool:
+    """
+    Send a single consolidated registration email that contains a welcome message,
+    a prominent button to go to the portal (or verification/login), and optionally
+    attaches a brochure PDF.
+
+    Args:
+        user: User instance
+        full_name: Full name to address in the email
+        portal_link: URL the button should point to (login or portal)
+        brochure_path: Optional filesystem path to a PDF to attach
+
+    Returns:
+        bool: True if email sent successfully, False otherwise
+    """
+    try:
+        subject = "Welcome to College Portal - Get Started"
+        html_content = render_to_string('emails/registration_email.html', {
+            'full_name': full_name,
+            'portal_link': portal_link,
+            'site_url': settings.SITE_BASE_URL,
+        })
+        text_content = render_to_string('emails/registration_email.txt', {
+            'full_name': full_name,
+            'portal_link': portal_link,
+            'site_url': settings.SITE_BASE_URL,
+        })
+
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=text_content,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email],
+        )
+        msg.attach_alternative(html_content, "text/html")
+
+        # Attach brochure if provided and exists
+        if brochure_path and os.path.exists(brochure_path):
+            try:
+                with open(brochure_path, 'rb') as f:
+                    msg.attach(os.path.basename(brochure_path), f.read(), 'application/pdf')
+            except Exception as e:
+                logger.warning(f"Failed to attach brochure {brochure_path}: {e}")
+
+        msg.send(fail_silently=False)
+        logger.info(f"Registration email sent to {user.email}")
+        return True
+
+    except Exception as e:
+        logger.error(f"Failed to send registration email to {user.email}: {e}")
+        return False
+
+
 def send_verification_confirmation(user) -> bool:
     """
     Send email confirmation when user's email is verified.
