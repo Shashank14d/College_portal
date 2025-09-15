@@ -59,54 +59,12 @@ TEMPLATES = [
 	}
 ]
 
-# Database Configuration
-# Try PostgreSQL first, fallback to SQLite if connection fails
-import getpass
-
-def get_database_config():
-    """Get database configuration, try PostgreSQL first"""
-    # Check if we have PostgreSQL password
-    password = os.getenv("DB_PASSWORD")
-    
-    if password:
-        # Try PostgreSQL with provided password
-        try:
-            import psycopg2
-            conn = psycopg2.connect(
-                host=os.getenv("DB_HOST", "localhost"),
-                port=os.getenv("DB_PORT", "5432"),
-                database=os.getenv("DB_NAME", "college_portal"),
-                user=os.getenv("DB_USER", "postgres"),
-                password=password
-            )
-            conn.close()
-            print("✅ Using PostgreSQL database")
-            return {
-                "ENGINE": "django.db.backends.postgresql",
-                "NAME": os.getenv("DB_NAME", "college_portal"),
-                "USER": os.getenv("DB_USER", "postgres"),
-                "PASSWORD": password,
-                "HOST": os.getenv("DB_HOST", "localhost"),
-                "PORT": os.getenv("DB_PORT", "5432"),
-            }
-        except Exception as e:
-            print(f"⚠️ PostgreSQL connection failed: {e}")
-            print("🔄 Falling back to SQLite...")
-    
-    # Fallback to SQLite
-    print("✅ Using SQLite database")
-    return {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        conn_max_age=600
     )
 }
 
