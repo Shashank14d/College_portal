@@ -1,6 +1,3 @@
-# Blueprint name
-name: college-portal-blueprint
-
 services:
   - type: web
     name: college-portal
