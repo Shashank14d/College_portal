@@ -225,13 +225,22 @@ def send_mentor_assignment_notifications(user, mentor) -> bool:
     """
     student_name = user.get_full_name() or user.first_name or user.email
     
-    # Send email notification
+    # Ensure portfolio and WhatsApp links are available
+    portfolio_url = mentor.portfolio_url
+    if not portfolio_url:
+        portfolio_url = f"{settings.SITE_BASE_URL}/mentor/{mentor.id}/"
+    
+    whatsapp_link = mentor.whatsapp_group_link
+    if not whatsapp_link:
+        whatsapp_link = "https://chat.whatsapp.com/default-group"
+    
+    # Send email notification with detailed mentor information
     email_sent = send_mentor_assignment(
         to_email=user.email,
         student_name=student_name,
         mentor_name=mentor.name,
-        portfolio_url=mentor.portfolio_url or f"{settings.SITE_BASE_URL}/mentor/{mentor.id}/",
-        whatsapp_link=mentor.whatsapp_group_link or ""
+        portfolio_url=portfolio_url,
+        whatsapp_link=whatsapp_link
     )
     
     # Send WhatsApp notification

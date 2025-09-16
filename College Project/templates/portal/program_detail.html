@@ -67,13 +67,15 @@
         {% if program.video %}
         <div class="mb-4">
             <h5 class="border-bottom pb-2 mb-3">Program Video</h5>
-            <video class="program-detail-video" controls autoplay muted poster="{% if program.image %}{{ program.image.url }}{% endif %}" style="width: 100%; max-width: 100%; border-radius: 12px; background: #000;">
+            <video class="program-detail-video" controls preload="metadata" poster="{% if program.image %}{{ program.image.url }}{% endif %}" style="width: 100%; max-width: 100%; border-radius: 12px; background: #000;">
                 <source src="{{ program.video.url }}" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
-            <a href="{{ program.video.url }}" class="btn btn-sm btn-outline-secondary mt-2" download>
-                <i class="fas fa-download mr-1"></i> Download Video
-            </a>
+            <div class="text-center mt-3">
+                <a href="{{ program.video.url }}" class="btn btn-primary" download>
+                    <i class="fas fa-download mr-1"></i> Download Video
+                </a>
+            </div>
         </div>
         {% endif %}
         {% if program.image %}
@@ -81,12 +83,12 @@
             <img src="{{ program.image.url }}" class="program-detail-image" alt="{{ program.name }} Image" style="width: 100%; max-width: 400px; border-radius: 12px; object-fit: cover; margin: 0 auto; box-shadow: 0 2px 12px rgba(37,99,235,0.08);">
         </div>
         {% endif %}
-        <div class="program-detail-brochure" style="text-align: center; margin-top: 1.5rem;">
-            <h5 class="card-title">Program Brochure</h5>
+        <div class="program-detail-brochure" style="text-align: center; margin-top: 1.5rem; padding: 20px; background-color: #f8f9fa; border-radius: 12px; box-shadow: 0 2px 12px rgba(37,99,235,0.08);">
+            <h5 class="card-title" style="color: #2563eb; margin-bottom: 15px;">Program Brochure</h5>
             <p class="card-text">Click below to download our detailed program brochure.</p>
             {% if program.brochure %}
-            <a href="{{ program.brochure.url }}" class="btn btn-primary" download style="max-width: 250px; width: 100%;">
-                <i class="fas fa-file-pdf mr-1"></i> Download Brochure (PDF)
+            <a href="{{ program.brochure.url }}" class="btn btn-primary btn-lg" download style="max-width: 300px; width: 100%; margin-top: 15px; padding: 12px 24px;">
+                <i class="fas fa-file-pdf mr-2"></i> Download Brochure (PDF)
             </a>
             {% else %}
             <p class="text-muted">Brochure not available.</p>

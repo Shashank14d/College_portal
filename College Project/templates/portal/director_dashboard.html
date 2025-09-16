@@ -217,7 +217,7 @@
                             <td>
                                 <div class="action-buttons">
                                     {% if not user_profile.verified %}
-                                    <button class="btn-small verify-btn" onclick="verifyUser({{ user_profile.user.id }})">Verify</button>
+                                    <button class="btn-small verify-btn" onclick="verifyUser('{{ user_profile.user.id }}')">Verify</button>
                                     {% endif %}
                                     <a href="/admin/core/userprofile/{{ user_profile.id }}/change/" class="btn-small edit-btn">Edit</a>
                                 </div>
@@ -352,13 +352,12 @@
             }
         }
     </script>
+    <!-- Footer -->
+    <footer style="background: #f8fafc; border-top: 1px solid #e5e7eb; padding: 1.5rem 0; margin-top: 0;">
+        <div class="container" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+            <div style="color: #64748b; font-size: 1rem;">&copy; {% now "Y" %} Surana College. All rights reserved.</div>
+            <div style="font-size: 0.95rem; color: #2563eb; opacity: 0.7;">Empowering Education, Inspiring Success</div>
         </div>
-        <!-- Footer -->
-        <footer style="background: #f8fafc; border-top: 1px solid #e5e7eb; padding: 1.5rem 0; margin-top: 0;">
-            <div class="container" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                <div style="color: #64748b; font-size: 1rem;">&copy; {{ now|date:'Y' }} Surana College. All rights reserved.</div>
-                <div style="font-size: 0.95rem; color: #2563eb; opacity: 0.7;">Empowering Education, Inspiring Success</div>
-            </div>
-        </footer>
+    </footer>
 </body>
 </html>
