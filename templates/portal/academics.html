@@ -45,7 +45,27 @@
                         {% for program in programs %}
                         <a href="{% url 'program_detail' program.id %}" class="program-card-link">
                             <div class="program-card">
-                                <div class="program-card-image" style="background-image: url('{{ program.image.url }}');"></div>
+                                {% if program.name|lower == "mca" %}
+                                    <div class="program-card-image" style="background-image: url('{{ program.image.url }}'); height: 220px; background-size: cover; background-position: center; border-radius: 12px;"></div>
+                                    {% if program.video %}
+                                    <div class="program-card-video" style="margin-top: 12px;">
+                                        <video controls style="width:100%;border-radius:8px;">
+                                            <source src="{{ program.video.url }}" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    </div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="program-card-image" style="background-image: url('{% if program.image %}{{ program.image.url }}{% else %}/static/img/logo.jpg{% endif %}');"></div>
+                                    {% if program.video %}
+                                    <div class="program-card-video">
+                                        <video controls style="width:100%;border-radius:8px;">
+                                            <source src="{{ program.video.url }}" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
                                 <div class="program-card-content">
                                     <h4>{{ program.name }}</h4>
                                     <p>{{ program.description|truncatewords:20 }}</p>
