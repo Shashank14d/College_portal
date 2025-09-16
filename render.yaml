@@ -1,9 +1,12 @@
+# Blueprint name
+name: college-portal-blueprint
+
 services:
   - type: web
     name: college-portal
     env: python
     buildCommand: ./build.sh
-    startCommand: cd "College Project" && python manage.py migrate && python manage.py create_superuser && gunicorn college_portal.wsgi:application
+    startCommand: python manage.py migrate && python manage.py create_superuser && gunicorn college_portal.wsgi:application
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -13,8 +16,6 @@ services:
         generateValue: true
       - key: PYTHON_VERSION
         value: 3.9.0
-      - key: DJANGO_SUPERUSER_ADMINS
-        value: "shashank,shashankk682@gmail.com,141020023sd"
 
 databases:
   - name: college-portal-db

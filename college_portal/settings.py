@@ -22,6 +22,7 @@ INSTALLED_APPS = [
 	"django.contrib.sessions",
 	"django.contrib.messages",
 	"django.contrib.staticfiles",
+    "whitenoise.runserver_nostatic",
 	"core",
 ]
 
@@ -87,6 +88,12 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 # Media files (for user-uploaded content)
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -114,4 +121,6 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or "webmaster@localhost"
 ADMINS = [("Admin", EMAIL_HOST_USER)] if EMAIL_HOST_USER else []
 MANAGERS = ADMINS
 
-SITE_BASE_URL = "http://127.0.0.1:8000"
+# Site base URL
+# Use Render's external URL in production, otherwise default to localhost
+SITE_BASE_URL = os.getenv("RENDER_EXTERNAL_URL", "http://127.0.0.1:8000")

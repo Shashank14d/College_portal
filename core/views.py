@@ -78,7 +78,8 @@ from .utils import (
 	send_verification_email, 
 	send_mentor_assignment, 
 	send_whatsapp_message,
-	send_mentor_notification_to_mentor
+	send_mentor_notification_to_mentor,
+    send_registration_email
 )
 
 
@@ -188,9 +189,10 @@ def register_post(request: HttpRequest) -> HttpResponse:
 		expires_at=timezone.now() + timedelta(hours=24),
 	)
 
-	# Send email with link to the main portal; user must log in there
-	portal_link = f"{os.getenv('SITE_BASE_URL', 'http://localhost:8000')}/portal/home/"
-	send_verification_email(to_email=email, full_name=full_name, verify_link=portal_link)
+	# Send email with link to the main portal and attach brochure
+	portal_link = f"{settings.SITE_BASE_URL}/portal/home/"
+	brochure_path = os.path.join(settings.BASE_DIR, 'static', 'brochures', 'mca_brochure.pdf')
+	send_registration_email(user=user, full_name=full_name, portal_link=portal_link, brochure_path=brochure_path)
 
 	RegistrationLog.objects.create(user=user, ip=request.META.get("REMOTE_ADDR"), status="submitted")
 	messages.success(request, "Registration successful. Check your email for the portal link and then log in.")
