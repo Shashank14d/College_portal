@@ -7,7 +7,7 @@ Student Details:
 - Email: {{ student_email }}
 - Phone: {{ student_phone|default:"Not provided" }}
 
-Please reach out to them to begin the mentorship process.
+Please reach out to them to begin the admission process.
 
 Thank you,
 Surana College Portal
