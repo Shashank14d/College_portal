@@ -3,4 +3,5 @@ psycopg2-binary>=2.9.3
 python-dotenv>=0.20.0
 dj-database-url>=0.5.0
 whitenoise>=6.2.0
+Pillow
 gunicorn>=20.1.0
