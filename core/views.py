@@ -37,10 +37,71 @@ def forgot_password(request: HttpRequest) -> HttpResponse:
 		reset_url = request.build_absolute_uri(
 			reverse("password_reset_confirm", kwargs={"uidb64": uid, "token": token})
 		)
-		# Send email
-		subject = "Password Reset for Surana College Portal"
-		message = render_to_string("emails/password_reset.txt", {"user": user, "reset_url": reset_url})
-		send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+		# Send email using direct method
+		try:
+			from core.send_email import send_direct_email
+			
+			html_content = f"""
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<style>
+					body {{ font-family: Arial, sans-serif; line-height: 1.6; }}
+					.container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+					.button {{ background-color: #4CAF50; color: white; padding: 10px 20px; 
+							text-decoration: none; border-radius: 5px; display: inline-block; }}
+				</style>
+			</head>
+			<body>
+				<div class="container">
+					<h2>Password Reset Request</h2>
+					<p>Hello {user.get_full_name() or user.username},</p>
+					<p>We received a request to reset your password. Click the button below to reset it:</p>
+					<p><a href="{reset_url}" class="button">Reset Password</a></p>
+					<p>If you didn't request this, you can safely ignore this email.</p>
+					<p>This link will expire in 24 hours.</p>
+					<p>Best regards,<br>College Portal Team</p>
+				</div>
+			</body>
+			</html>
+			"""
+			
+			text_content = f"""
+			Password Reset Request
+			
+			Hello {user.get_full_name() or user.username},
+			
+			We received a request to reset your password. Please visit the link below to reset it:
+			
+			{reset_url}
+			
+			If you didn't request this, you can safely ignore this email.
+			
+			This link will expire in 24 hours.
+			
+			Best regards,
+			College Portal Team
+			"""
+			
+			email_sent = send_direct_email(
+				to_emails=user.email,
+				subject="Password Reset for College Portal",
+				html_content=html_content,
+				text_content=text_content
+			)
+			
+			if not email_sent:
+				# Fallback to traditional method
+				subject = "Password Reset for College Portal"
+				message = render_to_string("emails/password_reset.txt", {"user": user, "reset_url": reset_url})
+				send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+				
+		except Exception:
+			# Fallback to traditional method if direct method fails
+			subject = "Password Reset for College Portal"
+			message = render_to_string("emails/password_reset.txt", {"user": user, "reset_url": reset_url})
+			send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+		
 		messages.success(request, "A password reset link has been sent to your email.")
 		return render(request, "public/forgot_password.html")
 	return render(request, "public/forgot_password.html")
@@ -181,18 +242,79 @@ def register_post(request: HttpRequest) -> HttpResponse:
 			)
 			
 	# Send registration email with brochure
+	# Always create the user account even if email fails
+	login_url = f"{settings.SITE_BASE_URL}/login/"
+	brochure_path = os.path.join(settings.BASE_DIR, 'static', 'brochures', 'mca_brochure.pdf')
+	
+	from core.send_email import send_direct_email
+	import logging
+	logger = logging.getLogger(__name__)
+	
+	# Prepare email content
+	html_content = f"""
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<style>
+			body {{ font-family: Arial, sans-serif; line-height: 1.6; }}
+			.container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+			.button {{ background-color: #4CAF50; color: white; padding: 10px 20px; 
+					  text-decoration: none; border-radius: 5px; display: inline-block; }}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h2>Welcome to College Portal!</h2>
+			<p>Hello {full_name},</p>
+			<p>Thank you for registering with us. Your account has been created successfully.</p>
+			<p><a href="{login_url}" class="button">Login to Your Account</a></p>
+			<p>If you have any questions, please contact our support team.</p>
+			<p>Best regards,<br>College Portal Team</p>
+		</div>
+	</body>
+	</html>
+	"""
+	
+	text_content = f"""
+	Welcome to College Portal!
+	
+	Hello {full_name},
+	
+	Thank you for registering with us. Your account has been created successfully.
+	
+	Login to your account: {login_url}
+	
+	If you have any questions, please contact our support team.
+	
+	Best regards,
+	College Portal Team
+	"""
+	
+	# Try to send email but don't block registration if it fails
 	try:
-		login_url = f"{settings.SITE_BASE_URL}/login/"
-		brochure_path = os.path.join(settings.BASE_DIR, 'static', 'brochures', 'mca_brochure.pdf')
-		
-		from core.utils import send_registration_email
-		send_registration_email(
-			user=user,
-			full_name=full_name,
-			portal_link=login_url,
-			brochure_path=brochure_path
+		# Send email with fallback options
+		email_sent = send_direct_email(
+			to_emails=email,
+			subject="Welcome to College Portal",
+			html_content=html_content,
+			text_content=text_content,
+			attachments=[brochure_path] if os.path.exists(brochure_path) else None,
+			fallback_to_console=True
 		)
-		logger.info(f"Registration email sent to {email} with brochure")
+		
+		# Log the email attempt
+		RegistrationLog.objects.create(
+			user=user,
+			email=email,
+			email_sent=email_sent,
+			source="web"
+		)
+		
+		# Even if email fails, we'll still create the account and let the user log in
+		if email_sent:
+			logger.info(f"Registration email sent to {email} using direct method")
+		else:
+			logger.error(f"Failed to send registration email to {email}")
 	except Exception as e:
 		logger.error(f"Failed to send registration email to {email}: {e}")
 
@@ -206,10 +328,11 @@ def register_post(request: HttpRequest) -> HttpResponse:
 		expires_at=timezone.now() + timedelta(hours=24),
 	)
 
-	# Send email with link to the main portal and attach brochure
-	portal_link = f"{settings.SITE_BASE_URL}/portal/home/"
-	brochure_path = os.path.join(settings.BASE_DIR, 'static', 'brochures', 'mca_brochure.pdf')
-	send_registration_email(user=user, full_name=full_name, portal_link=portal_link, brochure_path=brochure_path)
+	# Email has already been sent above, no need to send again
+	# Commenting out the duplicate email sending to prevent errors
+	# portal_link = f"{settings.SITE_BASE_URL}/portal/home/"
+	# brochure_path = os.path.join(settings.BASE_DIR, 'static', 'brochures', 'mca_brochure.pdf')
+	# send_registration_email(user=user, full_name=full_name, portal_link=portal_link, brochure_path=brochure_path)
 
 	RegistrationLog.objects.create(user=user, ip=request.META.get("REMOTE_ADDR"), status="submitted")
 	messages.success(request, "Registration successful. Check your email for the portal link and then log in.")
