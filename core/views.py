@@ -464,20 +464,52 @@ def request_mentor(request: HttpRequest) -> HttpResponse:
 	# Notify admins
 	email_success = True
 	try:
+		from core.send_email import send_direct_email
+		
 		admin_emails = User.objects.filter(is_staff=True).values_list("email", flat=True)
 		if admin_emails:
 			subject = "New Mentor Request Received"
-			message = render_to_string(
+			dashboard_url = request.build_absolute_uri("/director/dashboard/")
+			
+			# Prepare email content
+			html_content = f"""
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<style>
+					body {{ font-family: Arial, sans-serif; line-height: 1.6; }}
+					.container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+					.button {{ background-color: #4CAF50; color: white; padding: 10px 20px; 
+							text-decoration: none; border-radius: 5px; display: inline-block; }}
+				</style>
+			</head>
+			<body>
+				<div class="container">
+					<h2>New Mentor Request</h2>
+					<p>A new mentor request has been submitted by {request.user.get_full_name() or request.user.username}.</p>
+					<p>Email: {request.user.email}</p>
+					<p><a href="{dashboard_url}" class="button">View Dashboard</a></p>
+					<p>Please review and assign a mentor as soon as possible.</p>
+					<p>Best regards,<br>College Portal System</p>
+				</div>
+			</body>
+			</html>
+			"""
+			
+			text_content = render_to_string(
 				"emails/mentor_request_admin.txt",
-				{"user": request.user, "dashboard_url": request.build_absolute_uri("/director/dashboard/")}
+				{"user": request.user, "dashboard_url": dashboard_url}
 			)
-			email_sent = send_mail(
+			
+			# Use our robust email function with fallbacks
+			email_sent = send_direct_email(
+				to_emails=list(admin_emails),
 				subject=subject,
-				message=message, 
-				from_email=settings.DEFAULT_FROM_EMAIL, 
-				recipient_list=list(admin_emails),
-				fail_silently=True
+				html_content=html_content,
+				text_content=text_content,
+				fallback_to_console=True
 			)
+			
 			if email_sent:
 				logger.info(f"Admin notification sent for mentor request by {request.user.username}")
 			else:
