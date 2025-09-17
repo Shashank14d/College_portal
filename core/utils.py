@@ -37,34 +37,45 @@ def send_verification_email(to_email: str, full_name: str, verify_link: str) -> 
     Returns:
         bool: True if email sent successfully, False otherwise
     """
+    if not to_email:
+        logger.error("Cannot send verification email: recipient email is empty")
+        return False
+        
     try:
         subject = "Welcome to College Portal - Verify Your Email"
         
         # Render HTML and text versions
         html_content = render_to_string('emails/verify_email.html', {
-            'full_name': full_name,
+            'full_name': full_name or "User",
             'verify_link': verify_link,
             'site_url': settings.SITE_BASE_URL,
+            'current_year': timezone.now().year,
         })
         
         text_content = render_to_string('emails/verify_email.txt', {
-            'full_name': full_name,
+            'full_name': full_name or "User",
             'verify_link': verify_link,
             'site_url': settings.SITE_BASE_URL,
+            'current_year': timezone.now().year,
         })
         
         # Create email with both HTML and text versions
-        # Use send_mail to be compatible with test mocks
-        result = send_mail(
+        msg = EmailMultiAlternatives(
             subject=subject,
-            message=text_content,
+            body=text_content,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[to_email],
-            html_message=html_content,
-            fail_silently=False,
+            to=[to_email],
         )
-        logger.info(f"Verification email sent to {to_email}")
-        return True
+        msg.attach_alternative(html_content, "text/html")
+        
+        # Send email
+        result = msg.send(fail_silently=True)
+        if result:
+            logger.info(f"Verification email sent to {to_email}")
+            return True
+        else:
+            logger.error(f"Failed to send verification email to {to_email}")
+            return False
         
     except Exception as e:
         logger.error(f"Failed to send verification email to {to_email}: {e}")
@@ -91,78 +102,162 @@ def send_mentor_assignment(
     Returns:
         bool: True if email sent successfully, False otherwise
     """
+    if not to_email:
+        logger.error("Cannot send mentor assignment email: recipient email is empty")
+        return False
+        
     try:
         subject = "Mentor Assigned - College Portal"
         
+        # Prepare context with fallback values for optional parameters
+        context = {
+            'student_name': student_name or "Student",
+            'mentor_name': mentor_name or "Your Mentor",
+            'portfolio_url': portfolio_url or "#",
+            'whatsapp_link': whatsapp_link or "#",
+            'site_url': getattr(settings, 'SITE_BASE_URL', 'https://college-portal.example.com'),
+        }
+        
         # Render HTML and text versions
-        html_content = render_to_string('emails/mentor_assignment.html', {
-            'student_name': student_name,
-            'mentor_name': mentor_name,
-            'portfolio_url': portfolio_url,
-            'whatsapp_link': whatsapp_link,
-            'site_url': settings.SITE_BASE_URL,
-        })
+        html_content = render_to_string('emails/mentor_assignment.html', context)
+        text_content = render_to_string('emails/mentor_assignment.txt', context)
         
-        text_content = render_to_string('emails/mentor_assignment.txt', {
-            'student_name': student_name,
-            'mentor_name': mentor_name,
-            'portfolio_url': portfolio_url,
-            'whatsapp_link': whatsapp_link,
-            'site_url': settings.SITE_BASE_URL,
-        })
-        
-        # Create email with both HTML and text versions
+        # Send email with both HTML and text versions
         result = send_mail(
             subject=subject,
             message=text_content,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[to_email],
             html_message=html_content,
-            fail_silently=False,
+            fail_silently=True,  # Don't raise exceptions that would break the flow
         )
-        logger.info(f"Mentor assignment email sent to {to_email}")
-        return True
+        
+        if result:
+            logger.info(f"Mentor assignment email sent to {to_email}")
+            return True
+        else:
+            logger.warning(f"Failed to send mentor assignment email to {to_email}")
+            return False
         
     except Exception as e:
         logger.error(f"Failed to send mentor assignment email to {to_email}: {e}")
         return False
 
 
-def send_mentor_notification_to_mentor(mentor, user) -> bool:
+def send_mentor_notification_to_mentor(mentor, student_user, student_profile=None) -> bool:
     """
     Send notification to mentor about new student assignment.
     
     Args:
         mentor: Mentor instance
-        user: User instance (student)
+        student_user: User instance of the student
+        student_profile: UserProfile instance of the student (optional)
         
     Returns:
         bool: True if email sent successfully, False otherwise
     """
+    if not mentor or not hasattr(mentor, 'email') or not mentor.email:
+        logger.error("Cannot send mentor notification: mentor email is invalid")
+        return False
+        
+    if not student_user or not hasattr(student_user, 'email'):
+        logger.error("Cannot send mentor notification: student information is invalid")
+        return False
+        
     try:
-        subject = "New Student Assigned to You - College Portal"
-        student_name = user.get_full_name() or user.first_name or user.username
+        subject = "New Student Assignment - College Portal"
         
-        text_content = render_to_string('emails/mentor_student_assignment.txt', {
-            'mentor_name': mentor.name,
-            'student_name': student_name,
-            'student_email': user.email,
-            'student_phone': user.profile.phone,
-        })
+        # Get student information with fallbacks
+        student_name = student_user.get_full_name() or student_user.first_name or student_user.username
         
-        send_mail(
+        # Get student phone safely
+        student_phone = "Not provided"
+        if student_profile and hasattr(student_profile, 'phone'):
+            student_phone = student_profile.phone
+        elif hasattr(student_user, 'profile') and hasattr(student_user.profile, 'phone'):
+            student_phone = student_user.profile.phone
+            
+        html_content = f"""
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background-color: #67e8f9; color: #fff; padding: 10px; text-align: center; }}
+                .content {{ padding: 20px; }}
+                .student-info {{ background-color: #f5f5f5; padding: 15px; margin: 15px 0; border-left: 4px solid #67e8f9; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h2>New Student Assignment</h2>
+                </div>
+                <div class="content">
+                    <p>Hello {mentor.name},</p>
+                    <p>You have been assigned a new student in the College Portal:</p>
+                    
+                    <div class="student-info">
+                        <p><strong>Student:</strong> {student_name}</p>
+                        <p><strong>Email:</strong> {student_user.email}</p>
+                        <p><strong>Phone:</strong> {student_phone}</p>
+                    </div>
+                    
+                    <p>Please reach out to the student to introduce yourself and provide guidance.</p>
+                    <p>Best regards,<br>College Portal Team</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        text_content = f"""Hello {mentor.name},
+
+You have been assigned a new student in the College Portal:
+
+Student: {student_name}
+Email: {student_user.email}
+Phone: {student_phone}
+
+Please reach out to the student to introduce yourself and provide guidance.
+
+Best regards,
+College Portal Team"""
+        
+        msg = EmailMultiAlternatives(
             subject=subject,
-            message=text_content,
+            body=text_content,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[mentor.email],
-            fail_silently=False,
+            to=[mentor.email],
         )
+        msg.attach_alternative(html_content, "text/html")
         
-        logger.info(f"Notification sent to mentor {mentor.email} for student {user.email}")
-        return True
+        result = msg.send(fail_silently=True)
+        
+        # Also send a copy to admin
+        try:
+            admin_email = settings.ADMIN_EMAIL if hasattr(settings, 'ADMIN_EMAIL') else settings.DEFAULT_FROM_EMAIL
+            if admin_email and admin_email != mentor.email:
+                admin_msg = EmailMessage(
+                    subject=f"Mentor Assignment: {student_name} to {mentor.name}",
+                    body=f"A student has been assigned to a mentor:\nStudent: {student_name}\nMentor: {mentor.name}\nMentor Email: {mentor.email}",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[admin_email],
+                )
+                admin_msg.send(fail_silently=True)
+                logger.info(f"Admin notification sent to {admin_email} about mentor assignment")
+        except Exception as e:
+            logger.error(f"Failed to send admin notification about mentor assignment: {e}")
+        
+        if result:
+            logger.info(f"Mentor notification sent to {mentor.email} about student {student_user.email}")
+            return True
+        else:
+            logger.error(f"Failed to send mentor notification to {mentor.email}")
+            return False
         
     except Exception as e:
-        logger.error(f"Failed to send notification to mentor {mentor.email}: {e}")
+        logger.error(f"Failed to send mentor notification to {mentor.email if mentor else 'unknown'}: {e}")
         return False
 
 
@@ -334,17 +429,23 @@ def send_registration_email(user, full_name: str, portal_link: str, brochure_pat
     Returns:
         bool: True if email sent successfully, False otherwise
     """
+    if not user or not hasattr(user, 'email') or not user.email:
+        logger.error("Cannot send registration email: user or email is invalid")
+        return False
+        
     try:
         subject = "Welcome to College Portal - Get Started"
         html_content = render_to_string('emails/registration_email.html', {
-            'full_name': full_name,
-            'portal_link': portal_link,
+            'full_name': full_name or "User",
+            'portal_link': portal_link or f"{settings.SITE_BASE_URL}/login/",
             'site_url': settings.SITE_BASE_URL,
+            'current_year': timezone.now().year,
         })
         text_content = render_to_string('emails/registration_email.txt', {
-            'full_name': full_name,
-            'portal_link': portal_link,
+            'full_name': full_name or "User",
+            'portal_link': portal_link or f"{settings.SITE_BASE_URL}/login/",
             'site_url': settings.SITE_BASE_URL,
+            'current_year': timezone.now().year,
         })
 
         msg = EmailMultiAlternatives(
@@ -355,17 +456,45 @@ def send_registration_email(user, full_name: str, portal_link: str, brochure_pat
         )
         msg.attach_alternative(html_content, "text/html")
 
-        # Attach brochure if provided and exists
-        if brochure_path and os.path.exists(brochure_path):
+        # Default brochure path if not provided
+        if not brochure_path:
+            brochure_path = os.path.join(settings.BASE_DIR, 'static', 'brochures', 'mca_brochure.pdf')
+            
+        # Attach brochure if exists
+        if os.path.exists(brochure_path):
             try:
                 with open(brochure_path, 'rb') as f:
                     msg.attach(os.path.basename(brochure_path), f.read(), 'application/pdf')
+                    logger.info(f"Attached brochure to email for {user.email}")
             except Exception as e:
                 logger.warning(f"Failed to attach brochure {brochure_path}: {e}")
+        else:
+            logger.warning(f"Brochure not found at {brochure_path}")
 
-        msg.send(fail_silently=False)
-        logger.info(f"Registration email sent to {user.email}")
-        return True
+        # Send to user with real-time delivery
+        result = msg.send(fail_silently=False)
+        
+        # Also send a copy to admin
+        try:
+            admin_email = settings.ADMIN_EMAIL if hasattr(settings, 'ADMIN_EMAIL') else settings.DEFAULT_FROM_EMAIL
+            if admin_email and admin_email != user.email:
+                admin_msg = EmailMultiAlternatives(
+                    subject=f"New User Registration: {full_name}",
+                    body=f"A new user has registered:\nName: {full_name}\nEmail: {user.email}",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[admin_email],
+                )
+                admin_msg.send(fail_silently=True)
+                logger.info(f"Admin notification sent to {admin_email} about new user {user.email}")
+        except Exception as e:
+            logger.error(f"Failed to send admin notification about {user.email}: {e}")
+        
+        if result:
+            logger.info(f"Registration email sent to {user.email}")
+            return True
+        else:
+            logger.error(f"Failed to send registration email to {user.email}")
+            return False
 
     except Exception as e:
         logger.error(f"Failed to send registration email to {user.email}: {e}")

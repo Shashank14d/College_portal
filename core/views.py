@@ -115,7 +115,7 @@ def register_get(request: HttpRequest) -> HttpResponse:
 def register_post(request: HttpRequest) -> HttpResponse:
 	"""Process registration submission with server-side validation.
 
-	Saves user, profile, academic records, and sends verification email.
+	Saves user, profile, academic records, and sends registration email with brochure.
 	"""
 	if request.method != "POST":
 		return redirect("register_get")
@@ -149,6 +149,7 @@ def register_post(request: HttpRequest) -> HttpResponse:
 
 	# Create profile explicitly (signals don't auto-create to avoid test collisions)
 	profile = UserProfile.objects.create(user=user)
+
 	profile.full_name = full_name
 	profile.dob = request.POST.get("dob") or None
 	profile.father_name = request.POST.get("father_name", "")
@@ -178,6 +179,22 @@ def register_post(request: HttpRequest) -> HttpResponse:
 				year=int(years[i] or 0),
 				percentage=float(percentages[i] or 0),
 			)
+			
+	# Send registration email with brochure
+	try:
+		login_url = f"{settings.SITE_BASE_URL}/login/"
+		brochure_path = os.path.join(settings.BASE_DIR, 'static', 'brochures', 'mca_brochure.pdf')
+		
+		from core.utils import send_registration_email
+		send_registration_email(
+			user=user,
+			full_name=full_name,
+			portal_link=login_url,
+			brochure_path=brochure_path
+		)
+		logger.info(f"Registration email sent to {email} with brochure")
+	except Exception as e:
+		logger.error(f"Failed to send registration email to {email}: {e}")
 
 	# Optional: keep token for audit, but we won't require email verification
 	signer = TimestampSigner()
@@ -305,6 +322,11 @@ def portal_contact(request: HttpRequest) -> HttpResponse:
 @login_required
 def request_mentor(request: HttpRequest) -> HttpResponse:
 	"""Create a mentor request and notify admins."""
+	# Check if user already has a mentor assigned
+	if hasattr(request.user, 'profile') and request.user.profile.assigned_mentor:
+		messages.info(request, "You already have a mentor assigned.")
+		return redirect("portal_contact")
+		
 	# Prevent duplicate pending requests
 	if MentorRequest.objects.filter(user=request.user, status="pending").exists():
 		messages.warning(request, "You already have a pending mentor request.")
@@ -313,17 +335,40 @@ def request_mentor(request: HttpRequest) -> HttpResponse:
 	# Create the request
 	MentorRequest.objects.create(user=request.user, status="pending")
 
-	# Notify admins
-	admin_emails = User.objects.filter(is_staff=True).values_list("email", flat=True)
-	if admin_emails:
-		subject = "New Mentor Request Received"
-		message = render_to_string(
-			"emails/mentor_request_admin.txt",
-			{"user": request.user, "dashboard_url": request.build_absolute_uri("/director/dashboard/")}
-		)
-		send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, list(admin_emails))
+	# Log the request creation
+	logger.info(f"Mentor request created for user {request.user.username}")
 
-	messages.success(request, "Your mentor request has been submitted. You will be notified once it's reviewed.")
+	# Notify admins
+	email_success = True
+	try:
+		admin_emails = User.objects.filter(is_staff=True).values_list("email", flat=True)
+		if admin_emails:
+			subject = "New Mentor Request Received"
+			message = render_to_string(
+				"emails/mentor_request_admin.txt",
+				{"user": request.user, "dashboard_url": request.build_absolute_uri("/director/dashboard/")}
+			)
+			email_sent = send_mail(
+				subject=subject,
+				message=message, 
+				from_email=settings.DEFAULT_FROM_EMAIL, 
+				recipient_list=list(admin_emails),
+				fail_silently=True
+			)
+			if email_sent:
+				logger.info(f"Admin notification sent for mentor request by {request.user.username}")
+			else:
+				email_success = False
+				logger.warning(f"Failed to send admin notification for mentor request by {request.user.username}")
+	except Exception as e:
+		email_success = False
+		logger.error(f"Failed to send admin notification for mentor request: {e}")
+		# Continue execution even if email fails
+
+	success_message = "Your mentor request has been submitted."
+	if email_success:
+		success_message += " You will be notified once it's reviewed."
+	messages.success(request, success_message)
 	return redirect("portal_home")
 
 

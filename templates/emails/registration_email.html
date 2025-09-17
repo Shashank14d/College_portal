@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to College Portal</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #67e8f9;
+        }
+        .header h1 {
+            color: #67e8f9;
+            margin: 0;
+            font-size: 28px;
+        }
+        .greeting {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .content h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .content p {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .login-button {
+            display: inline-block;
+            background: linear-gradient(90deg, #67e8f9, #a78bfa);
+            color: #001018;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>College Portal</h1>
+        </div>
+        
+        <div class="greeting">
+            Hello {{ full_name }},
+        </div>
+        
+        <div class="content">
+            <h2>Welcome to College Portal!</h2>
+            <p>Thank you for registering with us. We're excited to have you join our community!</p>
+            <p>Your account has been created successfully. You can now access all the features and resources available on our platform.</p>
+            
+            <div style="text-align: center;">
+                <a href="{{ portal_link }}" class="login-button">Login to Your Account</a>
+            </div>
+            
+            <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; {{ current_year }} College Portal. All rights reserved.</p>
+            <p>This email was sent to you because you registered on our platform.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,14 @@
+Hello {{ full_name }},
+
+Welcome to College Portal!
+
+Thank you for registering with us. We're excited to have you join our community!
+
+Your account has been created successfully. You can now access all the features and resources available on our platform.
+
+To login to your account, please visit: {{ portal_link }}
+
+If you have any questions or need assistance, please don't hesitate to contact our support team.
+
+© {{ current_year }} College Portal. All rights reserved.
+This email was sent to you because you registered on our platform.

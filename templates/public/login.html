@@ -5,18 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - College Portal</title>
     <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        /* Mobile responsiveness fixes */
+        @media (max-width: 768px) {
+            .card {
+                width: 90% !important;
+                margin: 1rem auto !important;
+                padding: 1.5rem 1rem !important;
+            }
+            .auth-header h1 {
+                font-size: 1.8rem !important;
+            }
+            .remember-forgot {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 0.8rem !important;
+            }
+            .auth-nav {
+                flex-direction: column !important;
+                text-align: center !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
         <!-- Header -->
         <header style="background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(15,23,42,0.03);">
-            <div class="container" style="display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 0; margin-left:50px">
+            <div class="container" style="display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 1rem; max-width: 100%;">
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    <img src="/static/img/logo.jpg" alt="College Logo" style="height: 40px; width: 100%; border-radius: 8px; object-fit: contain; padding: 0; background: none;" onerror="this.style.display='none'">
+                    <img src="/static/img/logo.jpg" alt="College Logo" style="height: 40px; width: auto; border-radius: 8px; object-fit: contain; padding: 0; background: none;" onerror="this.style.display='none'">
                 </div>
             </div>
         </header>
-        <main class="container" style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
+        <main class="container" style="display: flex; justify-content: center; align-items: center; min-height: 80vh; padding: 0 1rem;">
                 <div class="card" style="max-width: 410px; width: 100%; margin: 2rem auto; padding: 2.7rem 2rem 2.2rem 2rem; box-shadow: 0 10px 20px rgba(0,0,0,0.5); border-radius: 20px;">
                     <div class="auth-header" style="text-align: center; margin-bottom: 2.2rem;">
                         <h1 style="font-size: 2.3rem; color: var(--neon); margin-bottom: 0.5rem; letter-spacing: 0.5px;">Student Login</h1>
@@ -34,22 +56,22 @@
                         {% csrf_token %}
                         <div>
                             <label for="email" style="font-weight: 600; color: #334155;">Email or Username</label>
-                            <input type="text" name="email" id="email" required placeholder="Enter your email or username" autocomplete="username" style="margin-top: 0.3rem;" />
+                            <input type="text" name="email" id="email" required placeholder="Enter your email or username" autocomplete="username" style="margin-top: 0.3rem; width: 100%;" />
                         </div>
                         <div>
                             <label for="password" style="font-weight: 600; color: #334155;">Password</label>
-                            <input type="password" name="password" id="password" required placeholder="Enter your password" autocomplete="current-password" style="margin-top: 0.3rem;" />
+                            <input type="password" name="password" id="password" required placeholder="Enter your password" autocomplete="current-password" style="margin-top: 0.3rem; width: 100%;" />
                         </div>
-                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                        <div class="remember-forgot" style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
                                 <input type="checkbox" name="remember_me" id="remember_me" style="width: 16px; height: 16px;" />
                                 <label for="remember_me" style="font-size: 0.97rem; color: #64748b; cursor: pointer;">Remember me</label>
                             </div>
                             <a href="/forgot-password/" style="font-size: 0.97rem; color: var(--neon); text-decoration: underline;">Forgot password?</a>
                         </div>
-                        <button type="submit" class="cta" style="width: 100%; margin-top: 0.5rem;border:none">Dive In</button>
+                        <button type="submit" class="cta" style="width: 100%; margin-top: 0.5rem; border:none">Dive In</button>
                     </form><br>
-                    <div class="auth-nav" style="flex-direction: row; gap: 1rem; justify-content: center;">
+                    <div class="auth-nav" style="display: flex; flex-direction: row; gap: 1rem; justify-content: center; align-items: center;">
                             <span class="auth-nav-text">Don't have an account?</span>
                             <a href="/register/" class="btn btn-secondary">Register</a>
                         </div>
