@@ -79,32 +79,12 @@
                         <a href="/" class="btn btn-secondary" style="width: 100%;">Back to Home</a>
                         <p style="margin-top: 1rem; color: #64748b; font-size: 0.97rem;">Need help? Contact <a href="mailto:info@college.edu" style="color: var(--neon); text-decoration: underline;">support</a>.</p>
                     </div>
+                    <div class="security-notice">
+                        <h4>🔒 Security Notice</h4>
+                        <p>This portal uses secure authentication. Never share your login credentials with anyone. If you suspect unauthorized access, contact support immediately.</p>
+                    </div>
                 </div>
-            {% comment %} <div class="help-options">
-                <div class="help-item">
-                    <h4>🔐 Forgot Password?</h4>
-                    <p>Contact technical support to reset your password</p>
-                    <a href="mailto:shashankk1410@gmail.com" class="help-link">shashankk1410@gmail.com</a>
-                </div>
-                
-                <div class="help-item">
-                    <h4>📧 Email Not Verified?</h4>
-                    <p>Check your email for verification link or contact support</p>
-                    <a href="mailto:support@college.edu" class="help-link">support@college.edu</a>
-                </div>
-                
-                <div class="help-item">
-                    <h4>🆕 New Student?</h4>
-                    <p>Register for a new account to access the portal</p>
-                    <a href="/register/" class="help-link">Create Account</a>
-                </div>
-            </div>
-        </div> {% endcomment %}
-
-        <div class="security-notice">
-            <h4>🔒 Security Notice</h4>
-            <p>This portal uses secure authentication. Never share your login credentials with anyone. If you suspect unauthorized access, contact support immediately.</p>
-        </div>
+              
     </main>
 
     <script>
@@ -322,16 +302,15 @@
         }
 
         .security-notice {
-            background: rgba(239, 68, 68, 0.1);
-            border:none;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
             border-radius: 8px;
             padding: 1rem;
             margin-top: 1.5rem;
-            margin-left: 50px;
         }
 
         .security-notice h4 {
-            color: #ef4444;
+            color: var(--neon);
             margin-bottom: 0.5rem;
         }
 
