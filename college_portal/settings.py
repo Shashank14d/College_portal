@@ -120,7 +120,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Email / Site config
 # Use console backend to see emails in the terminal output
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 # SMTP settings for production
 # EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
