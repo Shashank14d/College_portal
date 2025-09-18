@@ -128,7 +128,7 @@
         <div class="mb-4">
             <h5 class="border-bottom pb-2 mb-3">Program Video</h5>
             <video class="program-detail-video" controls preload="metadata" poster="{% if program.image %}{{ program.image.url }}{% endif %}" style="width: 100%; max-width: 100%; border-radius: 12px; background: #000;">
-                <source src="/static/videos/mca_video.mp4" type="video/mp4">
+                <source src="{% static 'videos/mca_video.mp4' %}" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
             <div class="text-center mt-3">
