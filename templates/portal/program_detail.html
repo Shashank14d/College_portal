@@ -3,10 +3,70 @@
 {% block title %}Program Details - {{ program.name }}{% endblock %}
 
 {% block content %}
+<style>
+    .hero-image-container {
+        width: 100%;
+        margin-bottom: 2rem;
+    }
+    .hero-image {
+        width: 100%;
+        max-height: 340px;
+        object-fit: cover;
+        display: block;
+        border-radius: 12px;
+    }
+    .art-gallery-masonry {
+        display: grid;
+        grid-template-areas: 'a a b c' 'd e b c';
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-template-rows: 180px 180px;
+        gap: 1.2rem;
+    }
+    .art-gallery-masonry img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(37,99,235,0.08);
+        cursor: pointer;
+    }
+    .art-gallery-masonry .img-a { grid-area: a; }
+    .art-gallery-masonry .img-b { grid-area: b; }
+    .art-gallery-masonry .img-c { grid-area: c; }
+    .art-gallery-masonry .img-d { grid-area: d; }
+    .art-gallery-masonry .img-e { grid-area: e; }
+
+    @media (max-width: 768px) {
+        .hero-image {
+            max-height: 220px;
+        }
+        .art-gallery-masonry {
+            grid-template-areas:
+                'a a'
+                'b c'
+                'd e';
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .art-gallery-masonry {
+            grid-template-areas:
+                'a'
+                'b'
+                'c'
+                'd'
+                'e';
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
 <!-- Hero Section with full-width image -->
 {% if program.name|lower == "mca" %}
-    <div style="width: 100%; margin-bottom: 2rem;">
-        <img src="/static/images/mca hero.png" alt="MCA Hero" style="width: 100%; max-height: 340px; object-fit: cover; display: block; border-radius: 12px;">
+    <div class="hero-image-container">
+        <img src="/static/images/mca hero.png" alt="MCA Hero" class="hero-image">
     </div>
 {% endif %}
 
@@ -28,12 +88,12 @@
 <!-- Art Gallery Section -->
 <div class="art-gallery-section" style="margin: 2rem auto; max-width: 900px;">
     <h2 style="text-align: center; color: #2563eb; font-weight: 700; margin-bottom: 1.5rem;">MCA Fun Gallery</h2>
-    <div class="art-gallery-masonry" style="display: grid; grid-template-areas: 'a a b c' 'd e b c'; grid-template-columns: 1fr 1fr 1fr 1fr; grid-template-rows: 180px 180px; gap: 1.2rem;">
-        <img src="/static/images/mca_art1.jpg" alt="Art 1" style="grid-area: a; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 10px rgba(37,99,235,0.08); cursor: pointer;" onclick="openModal('/static/images/mca_art1.jpg')">
-        <img src="/static/images/mca_art2.jpg" alt="Art 2" style="grid-area: b; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 10px rgba(37,99,235,0.08); cursor: pointer;" onclick="openModal('/static/images/mca_art2.jpg')">
-        <img src="/static/images/mca_art3.jpg" alt="Art 3" style="grid-area: c; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 10px rgba(37,99,235,0.08); cursor: pointer;" onclick="openModal('/static/images/mca_art3.jpg')">
-        <img src="/static/images/mca_art4.jpg" alt="Art 4" style="grid-area: d; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 10px rgba(37,99,235,0.08); cursor: pointer;" onclick="openModal('/static/images/mca_art4.jpg')">
-        <img src="/static/images/mca_art5.jpg" alt="Art 5" style="grid-area: e; width: 100%; height: 100%; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 10px rgba(37,99,235,0.08); cursor: pointer;" onclick="openModal('/static/images/mca_art5.jpg')">
+    <div class="art-gallery-masonry">
+        <img src="/static/images/mca_art1.jpg" alt="Art 1" class="img-a" onclick="openModal('/static/images/mca_art1.jpg')">
+        <img src="/static/images/mca_art2.jpg" alt="Art 2" class="img-b" onclick="openModal('/static/images/mca_art2.jpg')">
+        <img src="/static/images/mca_art3.jpg" alt="Art 3" class="img-c" onclick="openModal('/static/images/mca_art3.jpg')">
+        <img src="/static/images/mca_art4.jpg" alt="Art 4" class="img-d" onclick="openModal('/static/images/mca_art4.jpg')">
+        <img src="/static/images/mca_art5.jpg" alt="Art 5" class="img-e" onclick="openModal('/static/images/mca_art5.jpg')">
     </div>
     <!-- Modal for image preview -->
     <div id="galleryModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); align-items:center; justify-content:center;">

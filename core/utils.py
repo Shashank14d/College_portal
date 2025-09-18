@@ -8,7 +8,7 @@ mentor assignment notifications, and WhatsApp messages using Twilio API.
 import os
 import logging
 from typing import Optional
-from django.core.mail import send_mail, EmailMultiAlternatives
+from django.core.mail import send_mail, EmailMultiAlternatives, EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils import timezone
