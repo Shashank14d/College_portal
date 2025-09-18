@@ -1,0 +1,11 @@
+Hello {{ mentor_name }},
+
+You have been assigned a new mentee:
+
+Student Name: {{ student_name }}
+Student Email: {{ student_email }}
+
+Please reach out to them to begin the mentorship.
+
+Best regards,
+College Portal Team

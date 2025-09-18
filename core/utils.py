@@ -144,6 +144,62 @@ def send_mentor_assignment(
         return False
 
 
+def send_user_assignment_to_mentor(
+    to_email: str,
+    student_name: str,
+    mentor_name: str,
+    student_email: str
+) -> bool:
+    """
+    Send notification to mentor about new mentee assignment.
+    
+    Args:
+        to_email: Mentor's email address
+        student_name: Student's full name
+        mentor_name: Mentor's name
+        student_email: Student's email
+        
+    Returns:
+        bool: True if email sent successfully, False otherwise
+    """
+    if not to_email:
+        logger.error("Cannot send user assignment email to mentor: recipient email is empty")
+        return False
+        
+    try:
+        subject = "New Mentee Assigned - College Portal"
+        
+        context = {
+            'student_name': student_name or "Student",
+            'mentor_name': mentor_name or "Mentor",
+            'student_email': student_email,
+            'site_url': getattr(settings, 'SITE_BASE_URL', 'https://college-portal.example.com'),
+        }
+        
+        html_content = render_to_string('emails/user_assignment_to_mentor.html', context)
+        text_content = render_to_string('emails/user_assignment_to_mentor.txt', context)
+        
+        result = send_mail(
+            subject=subject,
+            message=text_content,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[to_email],
+            html_message=html_content,
+            fail_silently=True,
+        )
+        
+        if result:
+            logger.info(f"User assignment email sent to mentor {to_email}")
+            return True
+        else:
+            logger.error(f"Failed to send user assignment email to mentor {to_email}")
+            return False
+            
+    except Exception as e:
+        logger.error(f"Failed to send user assignment email to mentor {to_email}: {e}")
+        return False
+
+
 def send_mentor_notification_to_mentor(mentor, student_user, student_profile=None) -> bool:
     """
     Send notification to mentor about new student assignment.
@@ -329,13 +385,21 @@ def send_mentor_assignment_notifications(user, mentor) -> bool:
     if not whatsapp_link:
         whatsapp_link = "https://chat.whatsapp.com/default-group"
     
-    # Send email notification with detailed mentor information
-    email_sent = send_mentor_assignment(
+    # Send email notification to the student
+    email_sent_to_student = send_mentor_assignment(
         to_email=user.email,
         student_name=student_name,
         mentor_name=mentor.name,
         portfolio_url=portfolio_url,
         whatsapp_link=whatsapp_link
+    )
+
+    # Send email notification to the mentor
+    email_sent_to_mentor = send_user_assignment_to_mentor(
+        to_email=mentor.email,
+        student_name=student_name,
+        mentor_name=mentor.name,
+        student_email=user.email
     )
     
     # Send WhatsApp notification
@@ -366,7 +430,7 @@ College Portal Team"""
                 
         whatsapp_sent = send_whatsapp_message(phone, whatsapp_body)
     
-    return email_sent or whatsapp_sent
+    return email_sent_to_student or email_sent_to_mentor or whatsapp_sent
 
 
 def send_welcome_email(user) -> bool:
